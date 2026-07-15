@@ -20,10 +20,13 @@ Preencha no `.env`:
 | Variável | Descrição |
 |---|---|
 | `EXPO_PUBLIC_SUPABASE_URL` | URL do projeto Supabase |
-| `EXPO_PUBLIC_SUPABASE_ANON_KEY` | Anon/public key |
+| `EXPO_PUBLIC_SUPABASE_KEY` | Publishable/anon key (dashboard Expo) |
+| `EXPO_PUBLIC_SUPABASE_ANON_KEY` | (opcional) alias da mesma key |
 | `EXPO_PUBLIC_API_URL` | (opcional) Base URL do Axios |
 | `EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY` | (futuro) Stripe |
 | `EXPO_PUBLIC_REVENUECAT_API_KEY_*` | (futuro) RevenueCat iOS/Android |
+
+Client em `src/features/auth/supabase.ts` (Secure Store, não AsyncStorage). Não coloque senha do banco no app.
 
 No Supabase: Authentication → Providers → Email habilitado.
 

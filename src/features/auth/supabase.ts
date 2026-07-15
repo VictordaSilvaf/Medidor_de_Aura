@@ -45,7 +45,7 @@ const ExpoSecureStoreAdapter = {
 
 export const supabase = createClient(
   env.EXPO_PUBLIC_SUPABASE_URL,
-  env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
+  env.supabaseKey,
   {
     auth: {
       storage: ExpoSecureStoreAdapter,
