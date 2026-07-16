@@ -128,7 +128,7 @@ export default function HomeScreen() {
           <GradientButton
             title="Medir aura"
             icon={<Zap size={20} color="#FFFFFF" strokeWidth={2.2} />}
-            onPress={() => router.push('/(app)/measure')}
+            onPress={() => router.push('/(app)/capture')}
             accessibilityLabel="Medir sua aura agora"
           />
 

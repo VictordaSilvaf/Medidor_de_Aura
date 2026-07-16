@@ -18,5 +18,10 @@
     "nativewind-env.d.ts",
     "react-native-css-env.d.ts",
     "css-modules.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "supabase/functions",
+    "worker"
   ]
 }

@@ -19,6 +19,10 @@ export default function AppLayout() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
+      <Stack.Screen name="capture" options={{ animation: 'fade' }} />
+      <Stack.Screen name="preview" options={{ animation: 'slide_from_bottom' }} />
+      <Stack.Screen name="processing/[id]" options={{ animation: 'fade' }} />
+      <Stack.Screen name="result/[id]" options={{ animation: 'fade' }} />
       <Stack.Screen name="measure" options={{ animation: 'fade' }} />
     </Stack>
   );
