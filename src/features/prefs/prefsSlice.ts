@@ -9,7 +9,8 @@ type PrefsState = {
 
 const initialState: PrefsState = {
   hasCompletedOnboarding: false,
-  themeMode: 'system',
+  // Dark-first: o design system "Farmar Aura" foi desenhado para dark.
+  themeMode: 'dark',
 };
 
 const prefsSlice = createSlice({

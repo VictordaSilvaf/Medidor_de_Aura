@@ -1,4 +1,3 @@
-import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
@@ -6,6 +5,7 @@ import {
   FlatList,
   Pressable,
   StyleSheet,
+  Text,
   View,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
@@ -21,17 +21,19 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Button, ButtonText } from '@/components/ui/button';
-import { Text } from '@/components/ui/text';
 import { useAppDispatch } from '@/src/core/hooks';
+import { AURA_TIERS } from '@/src/features/aura/tiers';
 import {
   ONBOARDING_SLIDES,
   type OnboardingSlide,
 } from '@/src/features/onboarding/slides';
 import { setHasCompletedOnboarding } from '@/src/features/prefs/prefsSlice';
+import { AuraOrb } from '@/src/shared/ui/AuraOrb';
+import { GradientButton } from '@/src/shared/ui/GradientButton';
+import { fonts, palette } from '@/src/shared/ui/theme';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
-const STORY_DURATION_MS = 4500;
+const STORY_DURATION_MS = 5000;
 
 function ProgressSegment({
   index,
@@ -59,25 +61,46 @@ function ProgressSegment({
   );
 }
 
+function TierScale() {
+  return (
+    <View style={styles.tierRow}>
+      {AURA_TIERS.map((tier) => (
+        <View key={tier.id} style={styles.tierItem}>
+          <View
+            style={[
+              styles.tierDot,
+              {
+                backgroundColor: tier.color,
+                boxShadow: `0 0 10px 1px ${tier.color}66`,
+              },
+            ]}
+          />
+          <Text style={styles.tierLabel}>{tier.label}</Text>
+        </View>
+      ))}
+    </View>
+  );
+}
+
 function StorySlide({ item }: { item: OnboardingSlide }) {
   return (
     <View style={styles.slide}>
-      <LinearGradient
-        colors={[...item.colors]}
-        start={{ x: 0.15, y: 0 }}
-        end={{ x: 0.85, y: 1 }}
-        style={StyleSheet.absoluteFill}
-      />
+      <View style={styles.slideOrb}>
+        <AuraOrb
+          size={176}
+          colors={item.orb}
+          glowColor={item.accent}
+          intensity={0.2}
+        />
+      </View>
+
       <View style={styles.slideCopy}>
-        <Text className="mb-3 text-sm font-medium uppercase tracking-[0.18em] text-[#E8DCC8]">
+        <Text style={[styles.eyebrow, { color: item.accent }]}>
           {item.eyebrow}
         </Text>
-        <Text className="mb-4 text-4xl font-semibold leading-tight text-[#F7F2EA]">
-          {item.title}
-        </Text>
-        <Text className="max-w-[320px] text-base leading-6 text-[#D9CFC0]">
-          {item.body}
-        </Text>
+        <Text style={styles.title}>{item.title}</Text>
+        <Text style={styles.body}>{item.body}</Text>
+        {item.showTiers ? <TierScale /> : null}
       </View>
     </View>
   );
@@ -129,7 +152,7 @@ export default function OnboardingScreen() {
     };
   }, [goTo, index, progress]);
 
-  const onViewableItemsChanged = useRef(
+  const onViewableItemsChanged = useCallback(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
       const first = viewableItems[0];
       if (first?.index == null) return;
@@ -138,7 +161,8 @@ export default function OnboardingScreen() {
         setIndex(first.index);
       }
     },
-  ).current;
+    [],
+  );
 
   const onMomentumScrollEnd = (
     event: NativeSyntheticEvent<NativeScrollEvent>,
@@ -203,7 +227,7 @@ export default function OnboardingScreen() {
           style={styles.skip}
           hitSlop={8}
         >
-          <Text className="text-sm font-medium text-[#F4EFE6]">Pular</Text>
+          <Text style={styles.skipLabel}>Pular</Text>
         </Pressable>
 
         <View pointerEvents="box-none" style={styles.tapZones}>
@@ -216,17 +240,13 @@ export default function OnboardingScreen() {
           style={[styles.footer, { paddingBottom: insets.bottom + 20 }]}
         >
           {isLast ? (
-            <Button
-              className="bg-[#F4EFE6]"
+            <GradientButton
+              title="Começar a farmar"
               onPress={finish}
               accessibilityLabel="Começar a usar o app"
-            >
-              <ButtonText className="text-[#0B1014]">Começar</ButtonText>
-            </Button>
+            />
           ) : (
-            <Text className="text-center text-sm text-[#D9CFC0]">
-              Deslize ou toque para continuar
-            </Text>
+            <Text style={styles.hint}>Deslize ou toque para continuar</Text>
           )}
         </View>
       </View>
@@ -237,16 +257,64 @@ export default function OnboardingScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#07090B',
+    backgroundColor: palette.bg,
   },
   slide: {
     width: SCREEN_WIDTH,
     height: SCREEN_HEIGHT,
-    justifyContent: 'flex-end',
+    backgroundColor: palette.bg,
+  },
+  slideOrb: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 48,
   },
   slideCopy: {
     paddingHorizontal: 28,
-    paddingBottom: 140,
+    paddingBottom: 172,
+    gap: 12,
+  },
+  eyebrow: {
+    fontFamily: fonts.semibold,
+    fontSize: 12,
+    letterSpacing: 3.5,
+    textTransform: 'uppercase',
+  },
+  title: {
+    color: palette.textPrimary,
+    fontFamily: fonts.bold,
+    fontSize: 34,
+    lineHeight: 40,
+    letterSpacing: -0.5,
+  },
+  body: {
+    color: palette.textSecondary,
+    fontFamily: fonts.regular,
+    fontSize: 16,
+    lineHeight: 24,
+    maxWidth: 330,
+  },
+  tierRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 14,
+    marginTop: 10,
+  },
+  tierItem: {
+    alignItems: 'center',
+    gap: 6,
+  },
+  tierDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+  },
+  tierLabel: {
+    color: palette.textSecondary,
+    fontFamily: fonts.medium,
+    fontSize: 11,
+    letterSpacing: 0.4,
   },
   overlay: {
     ...StyleSheet.absoluteFill,
@@ -261,13 +329,13 @@ const styles = StyleSheet.create({
     height: 3,
     borderRadius: 2,
     overflow: 'hidden',
-    backgroundColor: 'rgba(255,255,255,0.25)',
+    backgroundColor: 'rgba(255,255,255,0.16)',
   },
   segmentFill: {
     height: '100%',
     width: '100%',
     borderRadius: 2,
-    backgroundColor: '#F4EFE6',
+    backgroundColor: palette.textPrimary,
     transformOrigin: 'left center',
   },
   skip: {
@@ -276,11 +344,16 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     zIndex: 2,
   },
+  skipLabel: {
+    color: palette.textSecondary,
+    fontFamily: fonts.medium,
+    fontSize: 14,
+  },
   tapZones: {
     ...StyleSheet.absoluteFill,
     flexDirection: 'row',
     top: 96,
-    bottom: 120,
+    bottom: 200,
   },
   tapLeft: {
     flex: 1,
@@ -294,5 +367,12 @@ const styles = StyleSheet.create({
     right: 24,
     bottom: 0,
     zIndex: 2,
+  },
+  hint: {
+    color: palette.textDisabled,
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    textAlign: 'center',
+    letterSpacing: 0.4,
   },
 });

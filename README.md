@@ -2,6 +2,16 @@
 
 App Expo (SDK 57) com base enterprise: Expo Router, Redux Toolkit + Persist (AsyncStorage), TanStack Query, Supabase Auth, Gluestack UI v5 + NativeWind v5, Axios, React Hook Form + Zod.
 
+## Design system "Farmar Aura"
+
+Identidade dark-first, premium e futurista (tema padrão: escuro; claro disponível no toggle da home).
+
+- **Tokens**: paleta em `global.css` (base `#09090B`, primária `#6D5DFC`, gradiente `#6D5DFC → #A855F7 → #EC4899`) e em `src/shared/ui/theme.ts` para estilos inline/Reanimated.
+- **Tipografia**: Space Grotesk (`@expo-google-fonts/space-grotesk`), carregada em `app/_layout.tsx` segurando a splash.
+- **Componentes**: `src/shared/ui/` — `AuraOrb` (orbe animado, assinatura do app), `AuraParticles`, `GradientButton` (radius 18, glow), `GlowCard` (borda branca 8%, glass opcional via expo-blur).
+- **Ícones**: `lucide-react-native` (outline, minimalista).
+- **Experiência central**: `app/(app)/measure.tsx` — scan com suspense, revelação do tier (Comum → Cósmica, sorteio local ponderado em `src/features/aura/`), pontuação com count-up e compartilhamento via Share API. Farm (total, medições, melhor tier) persiste no slice `aura`.
+
 ## Pré-requisitos
 
 - Node 18+
@@ -35,6 +45,8 @@ yarn start
 ```
 
 > No Linux, o React Native DevTools (Electron) fica desativado automaticamente (bug de path com espaço). Para depurar, pressione `j` no terminal do Expo e use o Chrome.
+>
+> **Rozenite** (Network, Performance, Navigation, Redux, Storage) fica ativo com `yarn start` (`WITH_ROZENITE=true`). Painéis aparecem no React Native DevTools.
 
 ## Arquitetura rápida
 

@@ -3,29 +3,38 @@ export type OnboardingSlide = {
   eyebrow: string;
   title: string;
   body: string;
-  colors: readonly [string, string, string];
+  /** Cor de acento do slide (glow + progresso). */
+  accent: string;
+  /** Gradiente do orbe do slide. */
+  orb: readonly [string, string, string];
+  /** Slide que exibe a régua de raridades. */
+  showTiers?: boolean;
 };
 
 export const ONBOARDING_SLIDES: OnboardingSlide[] = [
   {
-    id: 'presence',
-    eyebrow: 'Presença',
-    title: 'Sinta o campo ao seu redor',
-    body: 'O Medidor de Aura traduz o momento em uma leitura clara da sua energia.',
-    colors: ['#0B1014', '#1A2A28', '#C4A574'],
+    id: 'scan',
+    eyebrow: 'Scan',
+    title: 'Sua energia, quantificada',
+    body: 'O medidor lê a frequência do seu momento e converte tudo em pontos de aura.',
+    accent: '#6D5DFC',
+    orb: ['#4438C9', '#6D5DFC', '#A78BFA'],
   },
   {
-    id: 'pulse',
-    eyebrow: 'Ritmo',
-    title: 'Acompanhe o pulso da sua aura',
-    body: 'Veja como sua presença muda ao longo do dia e das semanas.',
-    colors: ['#120E0C', '#3D2418', '#E8B86D'],
+    id: 'tiers',
+    eyebrow: 'Raridade',
+    title: 'Seis tiers. Um é quase impossível.',
+    body: 'De Comum a Cósmica — quanto mais rara a leitura, maior a pontuação.',
+    accent: '#A855F7',
+    orb: ['#7E22CE', '#A855F7', '#E879F9'],
+    showTiers: true,
   },
   {
-    id: 'insight',
-    eyebrow: 'Clareza',
-    title: 'Descubra o que a energia revela',
-    body: 'Leituras e insights para entender padrões e agir com mais intenção.',
-    colors: ['#0A0F12', '#1C3340', '#7EB8B2'],
+    id: 'farm',
+    eyebrow: 'Farm',
+    title: 'Farme aura. Compartilhe o drop.',
+    body: 'Meça todos os dias, acumule pontos e mostre quando vier uma Lendária.',
+    accent: '#EC4899',
+    orb: ['#BE185D', '#EC4899', '#F9A8D4'],
   },
 ];

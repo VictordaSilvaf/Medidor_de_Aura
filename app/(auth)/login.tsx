@@ -1,11 +1,16 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link } from 'expo-router';
 import { Controller, useForm } from 'react-hook-form';
-import { KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  View,
+} from 'react-native';
 import { useState } from 'react';
 
 import { Box } from '@/components/ui/box';
-import { Button, ButtonSpinner, ButtonText } from '@/components/ui/button';
 import {
   FormControl,
   FormControlError,
@@ -22,7 +27,9 @@ import {
   loginSchema,
   type LoginFormValues,
 } from '@/src/features/auth/schemas';
-import { ThemeToggle } from '@/src/shared/ui/ThemeToggle';
+import { AuraOrb } from '@/src/shared/ui/AuraOrb';
+import { GradientButton } from '@/src/shared/ui/GradientButton';
+import { brandGradient, palette } from '@/src/shared/ui/theme';
 
 export default function LoginScreen() {
   const [submitting, setSubmitting] = useState(false);
@@ -53,92 +60,115 @@ export default function LoginScreen() {
       className="flex-1 bg-background"
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <Box className="flex-1 justify-center px-6">
-        <VStack space="xl">
-          <ThemeToggle />
-          <VStack space="sm">
-            <Heading size="2xl" className="text-foreground">
-              Medidor de Aura
-            </Heading>
-            <Text className="text-muted-foreground">
-              Entre para continuar
+      <ScrollView
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Box className="px-6 py-12">
+          <VStack space="2xl">
+            <VStack space="lg" className="items-center">
+              <View accessible={false}>
+                <AuraOrb
+                  size={84}
+                  colors={brandGradient}
+                  glowColor={palette.primary}
+                  intensity={0.15}
+                />
+              </View>
+              <VStack space="xs" className="items-center">
+                <Text className="text-xs uppercase tracking-[4px] text-muted-foreground font-grotesk-semibold">
+                  Medidor de Aura
+                </Text>
+                <Heading size="3xl" className="text-center text-foreground">
+                  Entre no campo
+                </Heading>
+                <Text className="text-center text-muted-foreground">
+                  Sua aura está esperando para ser medida
+                </Text>
+              </VStack>
+            </VStack>
+
+            <VStack space="lg">
+              <FormControl isInvalid={!!errors.email}>
+                <FormControlLabel>
+                  <FormControlLabelText className="font-grotesk-medium">
+                    E-mail
+                  </FormControlLabelText>
+                </FormControlLabel>
+                <Controller
+                  control={control}
+                  name="email"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <Input className="min-h-14 rounded-2xl">
+                      <InputField
+                        autoCapitalize="none"
+                        autoComplete="email"
+                        keyboardType="email-address"
+                        placeholder="voce@email.com"
+                        onBlur={onBlur}
+                        onChangeText={onChange}
+                        value={value}
+                      />
+                    </Input>
+                  )}
+                />
+                {errors.email ? (
+                  <FormControlError>
+                    <FormControlErrorText>
+                      {errors.email.message}
+                    </FormControlErrorText>
+                  </FormControlError>
+                ) : null}
+              </FormControl>
+
+              <FormControl isInvalid={!!errors.password}>
+                <FormControlLabel>
+                  <FormControlLabelText className="font-grotesk-medium">
+                    Senha
+                  </FormControlLabelText>
+                </FormControlLabel>
+                <Controller
+                  control={control}
+                  name="password"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <Input className="min-h-14 rounded-2xl">
+                      <InputField
+                        secureTextEntry
+                        autoCapitalize="none"
+                        placeholder="••••••••"
+                        onBlur={onBlur}
+                        onChangeText={onChange}
+                        value={value}
+                      />
+                    </Input>
+                  )}
+                />
+                {errors.password ? (
+                  <FormControlError>
+                    <FormControlErrorText>
+                      {errors.password.message}
+                    </FormControlErrorText>
+                  </FormControlError>
+                ) : null}
+              </FormControl>
+            </VStack>
+
+            <GradientButton
+              title={submitting ? 'Entrando…' : 'Entrar'}
+              onPress={onSubmit}
+              loading={submitting}
+            />
+
+            <Text className="text-center text-muted-foreground">
+              Não tem conta?{' '}
+              <Link href="/(auth)/register" className="text-primary">
+                Criar conta
+              </Link>
             </Text>
           </VStack>
-
-          <VStack space="md">
-            <FormControl isInvalid={!!errors.email}>
-              <FormControlLabel>
-                <FormControlLabelText>E-mail</FormControlLabelText>
-              </FormControlLabel>
-              <Controller
-                control={control}
-                name="email"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <Input>
-                    <InputField
-                      autoCapitalize="none"
-                      autoComplete="email"
-                      keyboardType="email-address"
-                      placeholder="voce@email.com"
-                      onBlur={onBlur}
-                      onChangeText={onChange}
-                      value={value}
-                    />
-                  </Input>
-                )}
-              />
-              {errors.email ? (
-                <FormControlError>
-                  <FormControlErrorText>
-                    {errors.email.message}
-                  </FormControlErrorText>
-                </FormControlError>
-              ) : null}
-            </FormControl>
-
-            <FormControl isInvalid={!!errors.password}>
-              <FormControlLabel>
-                <FormControlLabelText>Senha</FormControlLabelText>
-              </FormControlLabel>
-              <Controller
-                control={control}
-                name="password"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <Input>
-                    <InputField
-                      secureTextEntry
-                      autoCapitalize="none"
-                      placeholder="••••••••"
-                      onBlur={onBlur}
-                      onChangeText={onChange}
-                      value={value}
-                    />
-                  </Input>
-                )}
-              />
-              {errors.password ? (
-                <FormControlError>
-                  <FormControlErrorText>
-                    {errors.password.message}
-                  </FormControlErrorText>
-                </FormControlError>
-              ) : null}
-            </FormControl>
-          </VStack>
-
-          <Button onPress={onSubmit} disabled={submitting}>
-            {submitting ? <ButtonSpinner /> : null}
-            <ButtonText>{submitting ? 'Entrando…' : 'Entrar'}</ButtonText>
-          </Button>
-
-          <Text className="text-center text-muted-foreground">
-            Não tem conta?{' '}
-            <Link href="/(auth)/register" className="text-primary">
-              Criar conta
-            </Link>
-          </Text>
-        </VStack>
-      </Box>
+        </Box>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }

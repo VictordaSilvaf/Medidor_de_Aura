@@ -12,6 +12,7 @@ import { useAppDispatch, useAppSelector } from '@/src/core/hooks';
 import { bootstrapAuth } from '@/src/features/auth/authService';
 import { selectThemeMode } from '@/src/features/prefs/prefsSlice';
 import { queryClient } from '@/src/shared/api/queryClient';
+import { useRozeniteAppDevTools } from '@/src/shared/devtools/useRozeniteDevTools';
 
 function AuthBootstrap({ children }: { children: ReactNode }) {
   const dispatch = useAppDispatch();
@@ -33,6 +34,7 @@ function AuthBootstrap({ children }: { children: ReactNode }) {
 
 function ThemedShell({ children }: { children: ReactNode }) {
   const themeMode = useAppSelector(selectThemeMode);
+  useRozeniteAppDevTools();
 
   return (
     <GluestackUIProvider mode={themeMode}>

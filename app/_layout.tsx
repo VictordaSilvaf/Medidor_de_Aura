@@ -1,30 +1,47 @@
 import '../global.css';
 
-import { Stack } from 'expo-router';
+import {
+  SpaceGrotesk_400Regular,
+  SpaceGrotesk_500Medium,
+  SpaceGrotesk_600SemiBold,
+  SpaceGrotesk_700Bold,
+  useFonts,
+} from '@expo-google-fonts/space-grotesk';
+import { Stack, useNavigationContainerRef } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import { useEffect, type RefObject } from 'react';
 import { useColorScheme } from 'react-native';
+import type { NavigationContainerRef } from '@react-navigation/native';
 
 import { AppProviders } from '@/src/core/providers/AppProviders';
 import { useAppSelector } from '@/src/core/hooks';
 import { selectAuthStatus } from '@/src/features/auth/authSlice';
+import { useReactNavigationDevTools } from '@/src/shared/devtools/useRozeniteDevTools';
 import { Box } from '@/components/ui/box';
 import { Spinner } from '@/components/ui/spinner';
 
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
-function RootNavigator() {
+function RootNavigator({ fontsReady }: { fontsReady: boolean }) {
   const status = useAppSelector(selectAuthStatus);
   const colorScheme = useColorScheme();
+  const navigationRef = useNavigationContainerRef();
+
+  // Expo Router's ref type is slightly incompatible with Rozenite's RefObject expectation.
+  useReactNavigationDevTools({
+    ref: navigationRef as unknown as RefObject<NavigationContainerRef<any> | null>,
+  });
+
+  const bootReady = fontsReady && status !== 'idle' && status !== 'loading';
 
   useEffect(() => {
-    if (status !== 'idle' && status !== 'loading') {
+    if (bootReady) {
       SplashScreen.hideAsync().catch(() => undefined);
     }
-  }, [status]);
+  }, [bootReady]);
 
-  if (status === 'idle' || status === 'loading') {
+  if (!bootReady) {
     return (
       <Box className="flex-1 items-center justify-center bg-background">
         <Spinner />
@@ -47,9 +64,16 @@ function RootNavigator() {
 }
 
 export default function RootLayout() {
+  const [fontsLoaded, fontsError] = useFonts({
+    SpaceGrotesk_400Regular,
+    SpaceGrotesk_500Medium,
+    SpaceGrotesk_600SemiBold,
+    SpaceGrotesk_700Bold,
+  });
+
   return (
     <AppProviders>
-      <RootNavigator />
+      <RootNavigator fontsReady={fontsLoaded || !!fontsError} />
     </AppProviders>
   );
 }
