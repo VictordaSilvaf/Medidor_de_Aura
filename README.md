@@ -1,12 +1,12 @@
 # Medidor de Aura
 
-App Expo (SDK 57) com base enterprise: Expo Router, Redux Toolkit + Persist (MMKV), TanStack Query, Supabase Auth, Gluestack UI v5 + NativeWind v5, Axios, React Hook Form + Zod.
+App Expo (SDK 57) com base enterprise: Expo Router, Redux Toolkit + Persist (AsyncStorage), TanStack Query, Supabase Auth, Gluestack UI v5 + NativeWind v5, Axios, React Hook Form + Zod.
 
 ## Pré-requisitos
 
 - Node 18+
 - Conta [Supabase](https://supabase.com) (Auth)
-- Para MMKV nativo: development build (`npx expo run:android` / `run:ios`). No Expo Go há fallback em memória.
+- Funciona no **Expo Go** e em development builds
 
 ## Setup
 
@@ -34,12 +34,14 @@ No Supabase: Authentication → Providers → Email habilitado.
 yarn start
 ```
 
+> No Linux, o React Native DevTools (Electron) fica desativado automaticamente (bug de path com espaço). Para depurar, pressione `j` no terminal do Expo e use o Chrome.
+
 ## Arquitetura rápida
 
 - `app/` — rotas Expo Router. `(auth)` públicas; `(app)` exige login.
 - `src/core` — store Redux, hooks tipados e AppProviders.
 - `src/features/auth` — Supabase + slice Redux (sessão espelhada).
-- `src/features/prefs` — preferências persistidas (MMKV).
+- `src/features/prefs` — preferências persistidas (AsyncStorage).
 - `src/features/monetization` — port + adapters stub (RevenueCat / Stripe).
 - `src/shared/api` — Axios (Bearer Supabase) + React Query.
 - `components/ui` — Gluestack UI (copy-paste).

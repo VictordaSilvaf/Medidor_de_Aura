@@ -1,4 +1,4 @@
-import { Alert } from 'react-native';
+import { Alert, useColorScheme } from 'react-native';
 
 import { Box } from '@/components/ui/box';
 import { Button, ButtonText } from '@/components/ui/button';
@@ -9,10 +9,12 @@ import { useAppSelector } from '@/src/core/hooks';
 import { selectAuthUser } from '@/src/features/auth/authSlice';
 import { signOut } from '@/src/features/auth/authService';
 import { useSessionHealth } from '@/src/shared/api/useSessionHealth';
+import { ThemeToggle } from '@/src/shared/ui/ThemeToggle';
 
 export default function HomeScreen() {
   const user = useAppSelector(selectAuthUser);
   const health = useSessionHealth();
+  const colorScheme = useColorScheme();
 
   const handleSignOut = async () => {
     try {
@@ -35,6 +37,9 @@ export default function HomeScreen() {
             {user?.email ?? 'Usuário autenticado'}
           </Text>
           <Text className="text-sm text-muted-foreground">
+            Tema ativo: {colorScheme === 'dark' ? 'escuro' : 'claro'}
+          </Text>
+          <Text className="text-sm text-muted-foreground">
             API health:{' '}
             {health.isLoading
               ? 'checando…'
@@ -42,6 +47,11 @@ export default function HomeScreen() {
                 ? 'ok'
                 : 'indisponível (esperado até configurar backend)'}
           </Text>
+        </VStack>
+
+        <VStack space="sm">
+          <Text className="text-sm font-medium text-foreground">Aparência</Text>
+          <ThemeToggle />
         </VStack>
 
         <Button variant="outline" onPress={handleSignOut}>

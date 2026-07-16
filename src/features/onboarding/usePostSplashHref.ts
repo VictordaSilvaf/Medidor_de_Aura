@@ -1,20 +1,20 @@
-import { Redirect, Stack } from 'expo-router';
+import type { Href } from 'expo-router';
 
 import { useAppSelector } from '@/src/core/hooks';
 import { selectIsAuthenticated } from '@/src/features/auth/authSlice';
 import { selectHasCompletedOnboarding } from '@/src/features/prefs/prefsSlice';
 
-export default function AppLayout() {
-  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+export function usePostSplashHref(): Href {
   const hasCompletedOnboarding = useAppSelector(selectHasCompletedOnboarding);
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
 
   if (!hasCompletedOnboarding) {
-    return <Redirect href="/(onboarding)" />;
+    return '/(onboarding)';
   }
 
-  if (!isAuthenticated) {
-    return <Redirect href="/(auth)/login" />;
+  if (isAuthenticated) {
+    return '/(app)';
   }
 
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return '/(auth)/login';
 }

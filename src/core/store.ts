@@ -12,7 +12,7 @@ import {
 
 import { authReducer } from '@/src/features/auth/authSlice';
 import { prefsReducer } from '@/src/features/prefs/prefsSlice';
-import { reduxStorage } from '@/src/shared/storage/mmkv';
+import { reduxStorage } from '@/src/shared/storage/asyncStorage';
 
 const rootReducer = combineReducers({
   auth: authReducer,

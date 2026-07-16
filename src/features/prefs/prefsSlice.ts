@@ -1,8 +1,10 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
+export type ThemeMode = 'system' | 'light' | 'dark';
+
 type PrefsState = {
   hasCompletedOnboarding: boolean;
-  themeMode: 'system' | 'light' | 'dark';
+  themeMode: ThemeMode;
 };
 
 const initialState: PrefsState = {
@@ -17,7 +19,7 @@ const prefsSlice = createSlice({
     setHasCompletedOnboarding(state, action: PayloadAction<boolean>) {
       state.hasCompletedOnboarding = action.payload;
     },
-    setThemeMode(state, action: PayloadAction<PrefsState['themeMode']>) {
+    setThemeMode(state, action: PayloadAction<ThemeMode>) {
       state.themeMode = action.payload;
     },
   },
@@ -25,3 +27,10 @@ const prefsSlice = createSlice({
 
 export const { setHasCompletedOnboarding, setThemeMode } = prefsSlice.actions;
 export const prefsReducer = prefsSlice.reducer;
+
+export const selectHasCompletedOnboarding = (state: {
+  prefs: PrefsState;
+}) => state.prefs.hasCompletedOnboarding;
+
+export const selectThemeMode = (state: { prefs: PrefsState }) =>
+  state.prefs.themeMode;

@@ -5,12 +5,13 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
-import { store, persistor } from '@/src/core/store';
-import { useAppDispatch } from '@/src/core/hooks';
-import { bootstrapAuth } from '@/src/features/auth/authService';
-import { queryClient } from '@/src/shared/api/queryClient';
 import { Box } from '@/components/ui/box';
 import { Spinner } from '@/components/ui/spinner';
+import { store, persistor } from '@/src/core/store';
+import { useAppDispatch, useAppSelector } from '@/src/core/hooks';
+import { bootstrapAuth } from '@/src/features/auth/authService';
+import { selectThemeMode } from '@/src/features/prefs/prefsSlice';
+import { queryClient } from '@/src/shared/api/queryClient';
 
 function AuthBootstrap({ children }: { children: ReactNode }) {
   const dispatch = useAppDispatch();
@@ -30,6 +31,16 @@ function AuthBootstrap({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
+function ThemedShell({ children }: { children: ReactNode }) {
+  const themeMode = useAppSelector(selectThemeMode);
+
+  return (
+    <GluestackUIProvider mode={themeMode}>
+      <AuthBootstrap>{children}</AuthBootstrap>
+    </GluestackUIProvider>
+  );
+}
+
 function PersistLoading() {
   return (
     <Box className="flex-1 items-center justify-center bg-background">
@@ -44,9 +55,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
       <Provider store={store}>
         <PersistGate loading={<PersistLoading />} persistor={persistor}>
           <QueryClientProvider client={queryClient}>
-            <GluestackUIProvider mode="system">
-              <AuthBootstrap>{children}</AuthBootstrap>
-            </GluestackUIProvider>
+            <ThemedShell>{children}</ThemedShell>
           </QueryClientProvider>
         </PersistGate>
       </Provider>

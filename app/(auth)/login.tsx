@@ -22,6 +22,7 @@ import {
   loginSchema,
   type LoginFormValues,
 } from '@/src/features/auth/schemas';
+import { ThemeToggle } from '@/src/shared/ui/ThemeToggle';
 
 export default function LoginScreen() {
   const [submitting, setSubmitting] = useState(false);
@@ -54,6 +55,7 @@ export default function LoginScreen() {
     >
       <Box className="flex-1 justify-center px-6">
         <VStack space="xl">
+          <ThemeToggle />
           <VStack space="sm">
             <Heading size="2xl" className="text-foreground">
               Medidor de Aura

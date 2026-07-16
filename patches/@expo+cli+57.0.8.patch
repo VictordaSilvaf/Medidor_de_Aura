@@ -1,0 +1,17 @@
+diff --git a/node_modules/@expo/cli/build/src/start/server/metro/debugging/createDebugMiddleware.js b/node_modules/@expo/cli/build/src/start/server/metro/debugging/createDebugMiddleware.js
+index 963886d..5096b92 100644
+--- a/node_modules/@expo/cli/build/src/start/server/metro/debugging/createDebugMiddleware.js
++++ b/node_modules/@expo/cli/build/src/start/server/metro/debugging/createDebugMiddleware.js
+@@ -45,8 +45,10 @@ function createDebugMiddleware({ serverBaseUrl, reporter }) {
+             enableOpenDebuggerRedirect: _env.env.EXPO_DEBUG,
+             // The standalone fusebox shell (@react-native/debugger-shell) starts installing almost
+             // immediately in the background when the dev middleware is created, which we don't
+-            // always want to happen
+-            enableStandaloneFuseboxShell: !(0, _env.envIsHeadless)()
++            // always want to happen.
++            // Disabled: Electron shell fails on Linux paths with spaces + chrome-sandbox SUID.
++            // Use browser DevTools instead (press `j` in the Expo CLI).
++            enableStandaloneFuseboxShell: false
+         }
+     });
+     const debuggerWebsocketEndpoint = websocketEndpoints['/inspector/debug'];

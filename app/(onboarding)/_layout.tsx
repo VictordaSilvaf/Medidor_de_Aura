@@ -4,17 +4,15 @@ import { useAppSelector } from '@/src/core/hooks';
 import { selectIsAuthenticated } from '@/src/features/auth/authSlice';
 import { selectHasCompletedOnboarding } from '@/src/features/prefs/prefsSlice';
 
-export default function AppLayout() {
-  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+export default function OnboardingLayout() {
   const hasCompletedOnboarding = useAppSelector(selectHasCompletedOnboarding);
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
 
-  if (!hasCompletedOnboarding) {
-    return <Redirect href="/(onboarding)" />;
+  if (hasCompletedOnboarding) {
+    return (
+      <Redirect href={isAuthenticated ? '/(app)' : '/(auth)/login'} />
+    );
   }
 
-  if (!isAuthenticated) {
-    return <Redirect href="/(auth)/login" />;
-  }
-
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return <Stack screenOptions={{ headerShown: false, animation: 'fade' }} />;
 }

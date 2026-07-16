@@ -4,6 +4,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+import { useColorScheme } from 'react-native';
 
 import { AppProviders } from '@/src/core/providers/AppProviders';
 import { useAppSelector } from '@/src/core/hooks';
@@ -15,6 +16,7 @@ SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
 function RootNavigator() {
   const status = useAppSelector(selectAuthStatus);
+  const colorScheme = useColorScheme();
 
   useEffect(() => {
     if (status !== 'idle' && status !== 'loading') {
@@ -34,10 +36,12 @@ function RootNavigator() {
     <>
       <Stack screenOptions={{ headerShown: false, animation: 'fade' }}>
         <Stack.Screen name="index" />
+        <Stack.Screen name="splash" />
+        <Stack.Screen name="(onboarding)" />
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(app)" />
       </Stack>
-      <StatusBar style="auto" />
+      <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
     </>
   );
 }

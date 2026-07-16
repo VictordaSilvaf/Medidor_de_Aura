@@ -1,8 +1,7 @@
 import React, { useEffect } from 'react';
-import { View, ViewProps } from 'react-native';
+import { Appearance, View, type ViewProps } from 'react-native';
 import { OverlayProvider } from '@gluestack-ui/core/overlay/creator';
 import { ToastProvider } from '@gluestack-ui/core/toast/creator';
-import { Appearance, ColorSchemeName } from "react-native";
 
 export type ModeType = 'light' | 'dark' | 'system';
 
@@ -15,7 +14,12 @@ export function GluestackUIProvider({
   style?: ViewProps['style'];
 }) {
   useEffect(() => {
-    Appearance.setColorScheme(mode as ColorSchemeName);
+    // null restores device preference for NativeWind prefers-color-scheme
+    Appearance.setColorScheme(
+      (mode === 'system' ? null : mode) as unknown as Parameters<
+        typeof Appearance.setColorScheme
+      >[0],
+    );
   }, [mode]);
 
   return (
