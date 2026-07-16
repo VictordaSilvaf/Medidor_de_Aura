@@ -14,6 +14,7 @@ import {
 import { auraReducer } from '@/src/features/aura/auraSlice';
 import { authReducer } from '@/src/features/auth/authSlice';
 import { prefsReducer } from '@/src/features/prefs/prefsSlice';
+import { profileReducer } from '@/src/features/social/profileSlice';
 import { pendingCaptureReducer } from '@/src/features/video-analysis/pendingCaptureSlice';
 import { reduxStorage } from '@/src/shared/storage/asyncStorage';
 
@@ -22,6 +23,7 @@ const rootReducer = combineReducers({
   prefs: prefsReducer,
   aura: auraReducer,
   pendingCapture: pendingCaptureReducer,
+  profile: profileReducer,
 });
 
 const persistConfig = {

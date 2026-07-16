@@ -17,7 +17,9 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.medidordeaura.app",
       "infoPlist": {
-        "UIBackgroundModes": ["remote-notification"]
+        "UIBackgroundModes": [
+          "remote-notification"
+        ]
       }
     },
     "android": {
@@ -82,7 +84,8 @@
           "color": "#6D5DFC",
           "defaultChannel": "analysis"
         }
-      ]
+      ],
+      "expo-localization"
     ],
     "experiments": {
       "typedRoutes": true,

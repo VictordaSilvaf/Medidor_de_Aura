@@ -1,6 +1,7 @@
 import { File, UploadType } from 'expo-file-system';
 
 import { supabase } from '@/src/features/auth/supabase';
+import type { VideoVisibility } from '@/src/features/social/types';
 
 import type {
   CreateAnalysisResponse,
@@ -29,6 +30,8 @@ export async function createAnalysisAndUploadUrl(input: {
   fileSizeBytes: number;
   contentType: string;
   fileName: string;
+  visibility: VideoVisibility;
+  challengeId?: string | null;
 }): Promise<CreateAnalysisResponse> {
   return invokeFunction<CreateAnalysisResponse>('create-analysis', {
     source: input.source,
@@ -36,6 +39,8 @@ export async function createAnalysisAndUploadUrl(input: {
     fileSizeBytes: input.fileSizeBytes,
     contentType: input.contentType,
     fileName: input.fileName,
+    visibility: input.visibility,
+    challengeId: input.challengeId ?? null,
   });
 }
 
@@ -105,6 +110,8 @@ export async function submitPendingCapture(input: {
   fileSizeBytes: number;
   mimeType: string;
   fileName: string;
+  visibility: VideoVisibility;
+  challengeId?: string | null;
   onUploadProgress?: (ratio: number) => void;
 }): Promise<VideoAnalysis> {
   const created = await createAnalysisAndUploadUrl({
@@ -113,6 +120,8 @@ export async function submitPendingCapture(input: {
     fileSizeBytes: input.fileSizeBytes,
     contentType: input.mimeType,
     fileName: input.fileName,
+    visibility: input.visibility,
+    challengeId: input.challengeId,
   });
 
   await uploadVideoToR2({

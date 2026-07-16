@@ -47,7 +47,11 @@ Deno.serve(async (req) => {
 
   const { data: analysis, error: updateError } = await service
     .from('video_analyses')
-    .update({ status: 'queued' })
+    .update({
+      status: 'queued',
+      posted_at:
+        existing.visibility === 'public' ? new Date().toISOString() : null,
+    })
     .eq('id', analysisId)
     .eq('user_id', user.id)
     .select('*')

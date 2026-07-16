@@ -2,6 +2,18 @@
 
 App Expo (SDK 57) com base enterprise: Expo Router, Redux Toolkit + Persist (AsyncStorage), TanStack Query, Supabase Auth, Gluestack UI v5 + NativeWind v5, Axios, React Hook Form + Zod.
 
+## Social + gamificação
+
+- **i18n**: `pt-BR` / `en` / `es` (`src/shared/i18n`)
+- **Tabs**: Hub · Feed · Medir · Challenges · Perfil
+- **Perfil**: username obrigatório em `/(app)/profile/setup`
+- **Preview**: escolha Público / Privado antes do upload
+- **Feed**: medições públicas autenticadas + **Duelar**
+- **Challenges**: weekly/monthly/seasonal/duel/community/tier_hunt/streak (seed no SQL)
+- **XP/level/streak**: atualizados no worker (server truth); hub mostra progresso
+
+Migration: `supabase/migrations/20260716150000_profiles_challenges_feed.sql`
+
 ## Pipeline de vídeo (aura real)
 
 ```

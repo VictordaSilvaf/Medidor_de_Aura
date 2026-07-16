@@ -1,0 +1,115 @@
+import { supabase } from '@/src/features/auth/supabase';
+import type { AppDispatch } from '@/src/core/store';
+
+import { setMyProfile, setProfileLoading } from './profileSlice';
+import type { Profile, VideoVisibility } from './types';
+
+const USERNAME_RE = /^[a-z0-9_]{3,24}$/;
+
+export function normalizeUsername(raw: string): string {
+  return raw.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
+}
+
+export async function fetchMyProfile(userId: string): Promise<Profile | null> {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('user_id', userId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  return data as Profile | null;
+}
+
+export async function bootstrapProfile(
+  dispatch: AppDispatch,
+  userId: string | undefined,
+) {
+  if (!userId) {
+    dispatch(setMyProfile(null));
+    return;
+  }
+  dispatch(setProfileLoading(true));
+  try {
+    const profile = await fetchMyProfile(userId);
+    dispatch(setMyProfile(profile));
+  } catch {
+    dispatch(setMyProfile(null));
+  }
+}
+
+export async function createProfile(input: {
+  userId: string;
+  displayName: string;
+  username: string;
+  bio?: string;
+  defaultVisibility?: VideoVisibility;
+}): Promise<Profile> {
+  const username = normalizeUsername(input.username);
+  if (!USERNAME_RE.test(username)) {
+    throw new Error('USERNAME_INVALID');
+  }
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .insert({
+      user_id: input.userId,
+      display_name: input.displayName.trim() || username,
+      username,
+      bio: input.bio?.trim() ?? '',
+      default_visibility: input.defaultVisibility ?? 'private',
+    })
+    .select('*')
+    .single();
+
+  if (error) {
+    if (error.code === '23505') throw new Error('USERNAME_TAKEN');
+    throw new Error(error.message);
+  }
+  return data as Profile;
+}
+
+export async function updateProfile(
+  userId: string,
+  patch: Partial<
+    Pick<
+      Profile,
+      | 'display_name'
+      | 'bio'
+      | 'avatar_url'
+      | 'default_visibility'
+      | 'is_public_profile'
+    >
+  > & { username?: string },
+): Promise<Profile> {
+  const payload: Record<string, unknown> = { ...patch };
+  if (patch.username) {
+    const username = normalizeUsername(patch.username);
+    if (!USERNAME_RE.test(username)) throw new Error('USERNAME_INVALID');
+    payload.username = username;
+  }
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .update(payload)
+    .eq('user_id', userId)
+    .select('*')
+    .single();
+
+  if (error) {
+    if (error.code === '23505') throw new Error('USERNAME_TAKEN');
+    throw new Error(error.message);
+  }
+  return data as Profile;
+}
+
+export async function fetchProfileByUsername(
+  username: string,
+): Promise<Profile | null> {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('username', normalizeUsername(username))
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  return data as Profile | null;
+}

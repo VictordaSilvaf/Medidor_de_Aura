@@ -13,9 +13,11 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useAppDispatch } from '@/src/core/hooks';
+import { useAppDispatch, useAppSelector } from '@/src/core/hooks';
 import { recordAura } from '@/src/features/aura/auraSlice';
 import { TIER_BY_ID, tierChance } from '@/src/features/aura/tiers';
+import { selectAuthUser } from '@/src/features/auth/authSlice';
+import { bootstrapProfile } from '@/src/features/social/profileApi';
 import { useAnalysisSubscription } from '@/src/features/video-analysis/useAnalysisSubscription';
 import { AuraOrb } from '@/src/shared/ui/AuraOrb';
 import { AuraParticles } from '@/src/shared/ui/AuraParticles';
@@ -29,6 +31,7 @@ export default function ResultScreen() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const insets = useSafeAreaInsets();
+  const user = useAppSelector(selectAuthUser);
   const { id } = useLocalSearchParams<{ id: string }>();
   const { analysis, result, error, loading } = useAnalysisSubscription(id);
 
@@ -50,6 +53,9 @@ export default function ResultScreen() {
         measuredAt: Date.now(),
       }),
     );
+    if (user?.id) {
+      void bootstrapProfile(dispatch, user.id);
+    }
 
     flash.set(
       withSequence(
@@ -81,7 +87,7 @@ export default function ResultScreen() {
     return () => {
       if (countRef.current) clearInterval(countRef.current);
     };
-  }, [burst, dispatch, flash, result]);
+  }, [burst, dispatch, flash, result, user?.id]);
 
   const handleShare = useCallback(async () => {
     if (!result) return;

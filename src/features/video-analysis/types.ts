@@ -1,4 +1,5 @@
 import type { AuraTierId } from '@/src/features/aura/tiers';
+import type { VideoVisibility } from '@/src/features/social/types';
 
 import type { ANALYSIS_STATUSES } from './constants';
 
@@ -13,6 +14,8 @@ export type PendingCapture = {
   fileSizeBytes: number;
   mimeType: string;
   fileName: string;
+  /** Set when capture was started from a duel / challenge. */
+  challengeId?: string | null;
 };
 
 export type VideoAnalysis = {
@@ -25,6 +28,9 @@ export type VideoAnalysis = {
   duration_ms: number | null;
   file_size_bytes: number | null;
   error_message: string | null;
+  visibility: VideoVisibility;
+  posted_at: string | null;
+  challenge_id: string | null;
   created_at: string;
   updated_at: string;
   completed_at: string | null;

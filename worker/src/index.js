@@ -1,15 +1,7 @@
 /**
  * Worker IA separado — faz poll em video_analyses (status=queued),
- * processa stub (frames/áudio/movimento), grava resultado e envia push Expo.
- *
- * Env:
- *   SUPABASE_URL
- *   SUPABASE_SERVICE_ROLE_KEY
- *   R2_ACCOUNT_ID (opcional no stub)
- *   R2_ACCESS_KEY_ID
- *   R2_SECRET_ACCESS_KEY
- *   R2_BUCKET_NAME
- *   POLL_MS (default 4000)
+ * processa stub (frames/áudio/movimento), grava resultado, atualiza
+ * perfil (XP/level/streak), challenge entries e envia push Expo.
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -29,6 +21,25 @@ if (!supabaseUrl || !serviceKey) {
 const supabase = createClient(supabaseUrl, serviceKey, {
   auth: { persistSession: false, autoRefreshToken: false },
 });
+
+const TIER_ORDER = ['comum', 'rara', 'epica', 'lendaria', 'divina', 'cosmica'];
+
+function levelFromXp(xp) {
+  return Math.floor(Math.sqrt(Math.max(0, xp) / 100)) + 1;
+}
+
+function compareTiers(a, b) {
+  return TIER_ORDER.indexOf(a) - TIER_ORDER.indexOf(b);
+}
+
+function nextStreak(lastMeasureDate, previousStreak) {
+  const today = new Date().toISOString().slice(0, 10);
+  if (!lastMeasureDate) return 1;
+  if (lastMeasureDate === today) return previousStreak || 1;
+  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  if (lastMeasureDate === yesterday) return (previousStreak || 0) + 1;
+  return 1;
+}
 
 async function claimNextJob() {
   const { data: candidates, error } = await supabase
@@ -70,6 +81,88 @@ async function markFailed(id, message) {
   });
 }
 
+async function applyProfileRewards(job, result) {
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('user_id', job.user_id)
+    .maybeSingle();
+
+  if (!profile) return;
+
+  let bonusXp = 25 + Math.round(result.score / 20);
+  if (job.visibility === 'public') bonusXp += 15;
+  if (job.challenge_id) bonusXp += 20;
+
+  const xp = profile.xp + bonusXp;
+  const level = levelFromXp(xp);
+  const streak_days = nextStreak(profile.last_measure_date, profile.streak_days);
+  const best_tier_id =
+    !profile.best_tier_id || compareTiers(result.tierId, profile.best_tier_id) > 0
+      ? result.tierId
+      : profile.best_tier_id;
+
+  await supabase
+    .from('profiles')
+    .update({
+      xp,
+      level,
+      total_aura: profile.total_aura + result.score,
+      measurements: profile.measurements + 1,
+      best_tier_id,
+      streak_days,
+      last_measure_date: new Date().toISOString().slice(0, 10),
+    })
+    .eq('user_id', job.user_id);
+
+  return bonusXp;
+}
+
+async function attachChallengeEntry(job, result) {
+  if (!job.challenge_id) return;
+
+  await supabase.from('challenge_entries').upsert(
+    {
+      challenge_id: job.challenge_id,
+      user_id: job.user_id,
+      analysis_id: job.id,
+      score: result.score,
+      tier_id: result.tierId,
+    },
+    { onConflict: 'analysis_id' },
+  );
+
+  const { data: challenge } = await supabase
+    .from('challenges')
+    .select('*')
+    .eq('id', job.challenge_id)
+    .maybeSingle();
+
+  if (challenge?.type === 'duel' && challenge.rules?.target_score != null) {
+    const beat = result.score > Number(challenge.rules.target_score);
+    if (beat) {
+      await supabase
+        .from('challenges')
+        .update({ status: 'ended' })
+        .eq('id', challenge.id);
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('xp')
+        .eq('user_id', job.user_id)
+        .maybeSingle();
+
+      if (profile) {
+        const xp = profile.xp + (challenge.reward_xp || 75);
+        await supabase
+          .from('profiles')
+          .update({ xp, level: levelFromXp(xp) })
+          .eq('user_id', job.user_id);
+      }
+    }
+  }
+}
+
 async function completeJob(job, result) {
   await supabase.from('video_analysis_results').upsert(
     {
@@ -81,14 +174,16 @@ async function completeJob(job, result) {
     { onConflict: 'analysis_id' },
   );
 
-  await supabase
-    .from('video_analyses')
-    .update({
-      status: 'completed',
-      completed_at: new Date().toISOString(),
-      error_message: null,
-    })
-    .eq('id', job.id);
+  const patch = {
+    status: 'completed',
+    completed_at: new Date().toISOString(),
+    error_message: null,
+  };
+  if (job.visibility === 'public' && !job.posted_at) {
+    patch.posted_at = new Date().toISOString();
+  }
+
+  await supabase.from('video_analyses').update(patch).eq('id', job.id);
 
   for (const step of result.steps) {
     await supabase.from('video_analysis_events').insert({
@@ -97,6 +192,9 @@ async function completeJob(job, result) {
       detail: step.detail,
     });
   }
+
+  const bonusXp = await applyProfileRewards(job, result);
+  await attachChallengeEntry(job, result);
 
   const { data: tokens } = await supabase
     .from('device_push_tokens')
@@ -108,7 +206,7 @@ async function completeJob(job, result) {
       tokens.map((t) => t.token),
       {
         title: 'Aura pronta',
-        body: `Sua leitura ficou ${String(result.tierId).toUpperCase()} (+${result.score}).`,
+        body: `Sua leitura ficou ${String(result.tierId).toUpperCase()} (+${result.score})${bonusXp ? ` · +${bonusXp} XP` : ''}.`,
         data: { analysisId: job.id, type: 'analysis_completed' },
       },
     );

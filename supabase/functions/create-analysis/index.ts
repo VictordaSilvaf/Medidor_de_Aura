@@ -10,6 +10,8 @@ type Body = {
   fileSizeBytes: number;
   contentType: string;
   fileName: string;
+  visibility?: 'private' | 'public';
+  challengeId?: string | null;
 };
 
 function json(data: unknown, status = 200) {
@@ -80,6 +82,9 @@ Deno.serve(async (req) => {
   const analysisId = crypto.randomUUID();
   const storageKey = `videos/${user.id}/${analysisId}.${ext}`;
 
+  const visibility =
+    body.visibility === 'public' ? 'public' : 'private';
+
   const { data: analysis, error: insertError } = await service
     .from('video_analyses')
     .insert({
@@ -91,6 +96,8 @@ Deno.serve(async (req) => {
       content_type: body.contentType,
       duration_ms: Math.round(body.durationMs),
       file_size_bytes: body.fileSizeBytes,
+      visibility,
+      challenge_id: body.challengeId ?? null,
     })
     .select('*')
     .single();
