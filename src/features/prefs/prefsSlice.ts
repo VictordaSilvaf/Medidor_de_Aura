@@ -5,20 +5,29 @@ import type { AppLocale } from '@/src/shared/i18n/types';
 export type ThemeMode = 'system' | 'light' | 'dark';
 export type DefaultVisibility = 'private' | 'public';
 
+/** Opções de contagem regressiva antes de gravar (segundos). */
+export const COUNTDOWN_OPTIONS = [0, 3, 5, 10, 30] as const;
+export type CountdownSeconds = (typeof COUNTDOWN_OPTIONS)[number];
+
 type PrefsState = {
   hasCompletedOnboarding: boolean;
   themeMode: ThemeMode;
   locale: AppLocale | null;
   defaultVisibility: DefaultVisibility;
   pushEnabled: boolean;
+  countdownSeconds: CountdownSeconds;
+  /** IDs de análises cuja revelação especial já foi vista. */
+  seenRevealIds: string[];
 };
 
 const initialState: PrefsState = {
   hasCompletedOnboarding: false,
   themeMode: 'dark',
   locale: null,
-  defaultVisibility: 'private',
+  defaultVisibility: 'public',
   pushEnabled: true,
+  countdownSeconds: 3,
+  seenRevealIds: [],
 };
 
 const prefsSlice = createSlice({
@@ -40,6 +49,15 @@ const prefsSlice = createSlice({
     setPushEnabled(state, action: PayloadAction<boolean>) {
       state.pushEnabled = action.payload;
     },
+    setCountdownSeconds(state, action: PayloadAction<CountdownSeconds>) {
+      state.countdownSeconds = action.payload;
+    },
+    markRevealSeen(state, action: PayloadAction<string>) {
+      const id = action.payload;
+      if (!state.seenRevealIds.includes(id)) {
+        state.seenRevealIds = [id, ...state.seenRevealIds].slice(0, 100);
+      }
+    },
   },
 });
 
@@ -49,6 +67,8 @@ export const {
   setLocale,
   setDefaultVisibility,
   setPushEnabled,
+  setCountdownSeconds,
+  markRevealSeen,
 } = prefsSlice.actions;
 export const prefsReducer = prefsSlice.reducer;
 
@@ -66,3 +86,9 @@ export const selectDefaultVisibility = (state: { prefs: PrefsState }) =>
 
 export const selectPushEnabled = (state: { prefs: PrefsState }) =>
   state.prefs.pushEnabled;
+
+export const selectCountdownSeconds = (state: { prefs: PrefsState }) =>
+  state.prefs.countdownSeconds;
+
+export const selectSeenRevealIds = (state: { prefs: PrefsState }) =>
+  state.prefs.seenRevealIds;

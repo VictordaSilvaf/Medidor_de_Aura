@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
-import { Swords } from 'lucide-react-native';
+import { Plus, Swords } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
@@ -23,11 +23,13 @@ import { fonts, palette } from '@/src/shared/ui/theme';
 function FeedCard({
   item,
   onOpen,
+  onProfile,
   onDuel,
   canDuel,
 }: {
   item: FeedPost;
   onOpen: () => void;
+  onProfile: () => void;
   onDuel: () => void;
   canDuel: boolean;
 }) {
@@ -37,22 +39,29 @@ function FeedCard({
   return (
     <Pressable onPress={onOpen} style={styles.card}>
       <View style={styles.cardTop}>
-        <View
-          style={[
-            styles.avatar,
-            { backgroundColor: `${tier?.color ?? palette.primary}33` },
-          ]}
-        >
-          <Text style={[styles.avatarLetter, { color: tier?.color ?? palette.primary }]}>
-            {item.display_name.slice(0, 1).toUpperCase()}
-          </Text>
-        </View>
-        <View style={{ flex: 1 }}>
-          <Text style={styles.name}>{item.display_name}</Text>
-          <Text style={styles.meta}>
-            {t('feed.by', { username: item.username })} · Lv {item.level}
-          </Text>
-        </View>
+        <Pressable onPress={onProfile} style={styles.cardTopPress}>
+          <View
+            style={[
+              styles.avatar,
+              { backgroundColor: `${tier?.color ?? palette.primary}33` },
+            ]}
+          >
+            <Text
+              style={[
+                styles.avatarLetter,
+                { color: tier?.color ?? palette.primary },
+              ]}
+            >
+              {item.display_name.slice(0, 1).toUpperCase()}
+            </Text>
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.name}>{item.display_name}</Text>
+            <Text style={styles.meta}>
+              {t('feed.by', { username: item.username })} · Lv {item.level}
+            </Text>
+          </View>
+        </Pressable>
         <Text style={[styles.tier, { color: tier?.color ?? palette.textPrimary }]}>
           {tier?.label ?? item.tier_id}
         </Text>
@@ -82,8 +91,19 @@ export default function FeedScreen() {
   });
 
   return (
-    <View style={[styles.root, { paddingTop: insets.top + 16 }]}>
-      <Text style={styles.title}>{t('feed.title')}</Text>
+    <View style={[styles.root, { paddingTop: insets.top + 12 }]}>
+      <View style={styles.header}>
+        <Text style={styles.title}>{t('feed.title')}</Text>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('feed.record')}
+          onPress={() => router.push('/(app)/capture')}
+          style={styles.recordBtn}
+        >
+          <Plus size={22} color="#FFF" strokeWidth={2.4} />
+        </Pressable>
+      </View>
+
       {isLoading ? (
         <ActivityIndicator color={palette.primary} style={{ marginTop: 40 }} />
       ) : (
@@ -99,13 +119,24 @@ export default function FeedScreen() {
           refreshing={isRefetching}
           onRefresh={() => void refetch()}
           ListEmptyComponent={
-            <Text style={styles.empty}>{t('feed.empty')}</Text>
+            <View style={styles.emptyWrap}>
+              <Text style={styles.empty}>{t('feed.empty')}</Text>
+              <GradientButton
+                title={t('feed.record')}
+                icon={<Plus size={18} color="#FFF" strokeWidth={2.2} />}
+                onPress={() => router.push('/(app)/capture')}
+                style={{ marginTop: 16, alignSelf: 'stretch' }}
+              />
+            </View>
           }
           renderItem={({ item }) => (
             <FeedCard
               item={item}
               canDuel={item.user_id !== user?.id}
               onOpen={() => router.push(`/(app)/post/${item.id}`)}
+              onProfile={() =>
+                router.push(`/(app)/user/${item.username}`)
+              }
               onDuel={() => router.push(`/(app)/post/${item.id}`)}
             />
           )}
@@ -117,18 +148,40 @@ export default function FeedScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: palette.bg },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    marginBottom: 16,
+  },
   title: {
     color: palette.textPrimary,
     fontFamily: fonts.bold,
     fontSize: 24,
-    paddingHorizontal: 20,
-    marginBottom: 16,
+  },
+  recordBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 16,
+    backgroundColor: palette.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: palette.primary,
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 6,
+  },
+  emptyWrap: {
+    marginTop: 48,
+    paddingHorizontal: 12,
+    alignItems: 'center',
   },
   empty: {
     color: palette.textSecondary,
     fontFamily: fonts.medium,
     textAlign: 'center',
-    marginTop: 48,
   },
   card: {
     borderRadius: 18,
@@ -138,6 +191,12 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   cardTop: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  cardTopPress: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
   avatar: {
     width: 42,
     height: 42,

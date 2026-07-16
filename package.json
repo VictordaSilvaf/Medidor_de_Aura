@@ -2,6 +2,9 @@
   "name": "medidor_de_aura",
   "version": "1.0.0",
   "main": "expo-router/entry",
+  "engines": {
+    "node": "^20.19.4 || ^22.13.0 || ^24.3.0 || >= 25.0.0"
+  },
   "dependencies": {
     "@expo-google-fonts/space-grotesk": "^0.4.1",
     "@expo/html-elements": "^57.0.0",
@@ -77,10 +80,10 @@
     "typescript": "~6.0.3"
   },
   "scripts": {
-    "start": "WITH_ROZENITE=true expo start",
-    "android": "WITH_ROZENITE=true expo run:android",
-    "ios": "WITH_ROZENITE=true expo run:ios",
-    "web": "WITH_ROZENITE=true expo start --web",
+    "start": "WITH_ROZENITE=true NODE_ENV=development expo start",
+    "android": "WITH_ROZENITE=true NODE_ENV=development expo run:android",
+    "ios": "WITH_ROZENITE=true NODE_ENV=development expo run:ios",
+    "web": "WITH_ROZENITE=true NODE_ENV=development expo start --web",
     "lint": "expo lint",
     "postinstall": "patch-package"
   },

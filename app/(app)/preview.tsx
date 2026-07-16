@@ -124,7 +124,7 @@ export default function PreviewScreen() {
 
         <Text style={styles.visibilityLabel}>{t('preview.visibility')}</Text>
         <View style={styles.visibilityRow}>
-          {(['private', 'public'] as const).map((value) => {
+          {(['public', 'private'] as const).map((value) => {
             const active = visibility === value;
             return (
               <Pressable

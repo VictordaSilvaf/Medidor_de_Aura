@@ -29,7 +29,7 @@ create table public.profiles (
   is_public_profile boolean not null default true,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  constraint profiles_username_format check (username ~ '^[a-z0-9_]{3,24}$'),
+  constraint profiles_username_format check (username ~ '^[a-zA-Z0-9_]{3,24}$'),
   constraint profiles_username_unique unique (username)
 );
 

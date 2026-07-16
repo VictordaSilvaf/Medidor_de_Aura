@@ -28,7 +28,10 @@
     "measureCta": "Medir aura",
     "activeChallenge": "Challenge em destaque",
     "seeAllChallenges": "Ver challenges",
-    "anonymous": "Perfil anônimo"
+    "anonymous": "Perfil anônimo",
+    "recentUploads": "Últimos uploads",
+    "seeAllUploads": "Ver todos",
+    "noUploads": "Nenhum vídeo ainda. Faça sua primeira medição."
   },
   "settings": {
     "title": "Configurações",
@@ -56,7 +59,7 @@
     "editTitle": "Editar perfil",
     "displayName": "Nome",
     "username": "Username",
-    "usernameHint": "Só letras minúsculas, números e _",
+    "usernameHint": "Letras, números e _ (3–24 caracteres)",
     "bio": "Bio",
     "publicProfile": "Perfil público",
     "levelXp": "Nível {{level}} · {{xp}} XP",
@@ -64,7 +67,17 @@
     "edit": "Editar",
     "settings": "Configurações",
     "usernameTaken": "Esse username já está em uso.",
-    "usernameRequired": "Username é obrigatório."
+    "usernameRequired": "Username é obrigatório.",
+    "posts": "Posts",
+    "followers": "Seguidores",
+    "following": "Seguindo",
+    "follow": "Seguir",
+    "unfollow": "Seguindo",
+    "connections": "Conexões",
+    "emptyFollowers": "Nenhum seguidor ainda.",
+    "emptyFollowing": "Ainda não segue ninguém.",
+    "noPosts": "Nenhum post público ainda.",
+    "notFound": "Perfil não encontrado."
   },
   "preview": {
     "title": "Preview",
@@ -87,7 +100,8 @@
     "empty": "Nada público ainda. Seja o primeiro a postar.",
     "duel": "Duelar",
     "score": "+{{score}} aura",
-    "by": "@{{username}}"
+    "by": "@{{username}}",
+    "record": "Gravar"
   },
   "post": {
     "title": "Medição pública",
@@ -127,12 +141,35 @@
     "countdown": "Contagem",
     "stop": "Parar",
     "getReady": "Prepare-se",
-    "limitBadge": "Até 1:00 · 50 MB"
+    "limitBadge": "Até 1:00 · 50 MB",
+    "settingsIsland": "Configurações",
+    "visibilityLabel": "Visibilidade",
+    "visibilityPublic": "Público",
+    "visibilityPrivate": "Privado",
+    "visibilityPublicHint": "Entra no feed",
+    "visibilityPrivateHint": "Só você vê",
+    "countdownLabel": "Contagem",
+    "countdownOff": "Off",
+    "countdownSeconds": "{{count}}s",
+    "cancelCountdown": "Cancelar",
+    "tapToCancel": "Toque fora para cancelar"
   },
   "auth": {
     "loginTitle": "Entrar",
     "registerTitle": "Criar conta",
     "email": "E-mail",
     "password": "Senha"
+  },
+  "uploads": {
+    "title": "Meus uploads",
+    "subtitle": "Histórico de vídeos e análises",
+    "empty": "Você ainda não enviou nenhum vídeo.",
+    "newBadge": "NOVO"
+  },
+  "reveal": {
+    "yourAura": "Sua aura é",
+    "share": "Compartilhar",
+    "measureAgain": "Medir de novo",
+    "unavailable": "Resultado indisponível."
   }
 }

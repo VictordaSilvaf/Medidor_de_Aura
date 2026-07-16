@@ -4,10 +4,10 @@ import type { AppDispatch } from '@/src/core/store';
 import { setMyProfile, setProfileLoading } from './profileSlice';
 import type { Profile, VideoVisibility } from './types';
 
-const USERNAME_RE = /^[a-z0-9_]{3,24}$/;
+const USERNAME_RE = /^[a-zA-Z0-9_]{3,24}$/;
 
 export function normalizeUsername(raw: string): string {
-  return raw.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
+  return raw.trim().replace(/[^a-zA-Z0-9_]/g, '');
 }
 
 export async function fetchMyProfile(userId: string): Promise<Profile | null> {
@@ -56,7 +56,7 @@ export async function createProfile(input: {
       display_name: input.displayName.trim() || username,
       username,
       bio: input.bio?.trim() ?? '',
-      default_visibility: input.defaultVisibility ?? 'private',
+      default_visibility: input.defaultVisibility ?? 'public',
     })
     .select('*')
     .single();
@@ -105,10 +105,13 @@ export async function updateProfile(
 export async function fetchProfileByUsername(
   username: string,
 ): Promise<Profile | null> {
+  const normalized = normalizeUsername(username);
+  // Escape LIKE wildcards so `_` is literal (usernames may contain it).
+  const pattern = normalized.replace(/[\\%_]/g, '\\$&');
   const { data, error } = await supabase
     .from('profiles')
     .select('*')
-    .eq('username', normalizeUsername(username))
+    .ilike('username', pattern)
     .maybeSingle();
   if (error) throw new Error(error.message);
   return data as Profile | null;

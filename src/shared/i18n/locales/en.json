@@ -28,7 +28,10 @@
     "measureCta": "Measure aura",
     "activeChallenge": "Featured challenge",
     "seeAllChallenges": "See challenges",
-    "anonymous": "Anonymous profile"
+    "anonymous": "Anonymous profile",
+    "recentUploads": "Recent uploads",
+    "seeAllUploads": "See all",
+    "noUploads": "No videos yet. Take your first measurement."
   },
   "settings": {
     "title": "Settings",
@@ -56,7 +59,7 @@
     "editTitle": "Edit profile",
     "displayName": "Display name",
     "username": "Username",
-    "usernameHint": "Lowercase letters, numbers and _ only",
+    "usernameHint": "Letters, numbers and _ (3–24 characters)",
     "bio": "Bio",
     "publicProfile": "Public profile",
     "levelXp": "Level {{level}} · {{xp}} XP",
@@ -64,7 +67,17 @@
     "edit": "Edit",
     "settings": "Settings",
     "usernameTaken": "That username is taken.",
-    "usernameRequired": "Username is required."
+    "usernameRequired": "Username is required.",
+    "posts": "Posts",
+    "followers": "Followers",
+    "following": "Following",
+    "follow": "Follow",
+    "unfollow": "Following",
+    "connections": "Connections",
+    "emptyFollowers": "No followers yet.",
+    "emptyFollowing": "Not following anyone yet.",
+    "noPosts": "No public posts yet.",
+    "notFound": "Profile not found."
   },
   "preview": {
     "title": "Preview",
@@ -87,7 +100,8 @@
     "empty": "Nothing public yet. Be the first to post.",
     "duel": "Duel",
     "score": "+{{score}} aura",
-    "by": "@{{username}}"
+    "by": "@{{username}}",
+    "record": "Record"
   },
   "post": {
     "title": "Public measurement",
@@ -127,12 +141,35 @@
     "countdown": "Countdown",
     "stop": "Stop",
     "getReady": "Get ready",
-    "limitBadge": "Up to 1:00 · 50 MB"
+    "limitBadge": "Up to 1:00 · 50 MB",
+    "settingsIsland": "Settings",
+    "visibilityLabel": "Visibility",
+    "visibilityPublic": "Public",
+    "visibilityPrivate": "Private",
+    "visibilityPublicHint": "Goes to the feed",
+    "visibilityPrivateHint": "Only you see it",
+    "countdownLabel": "Countdown",
+    "countdownOff": "Off",
+    "countdownSeconds": "{{count}}s",
+    "cancelCountdown": "Cancel",
+    "tapToCancel": "Tap outside to cancel"
   },
   "auth": {
     "loginTitle": "Sign in",
     "registerTitle": "Create account",
     "email": "Email",
     "password": "Password"
+  },
+  "uploads": {
+    "title": "My uploads",
+    "subtitle": "Video and analysis history",
+    "empty": "You haven't uploaded any videos yet.",
+    "newBadge": "NEW"
+  },
+  "reveal": {
+    "yourAura": "Your aura is",
+    "share": "Share",
+    "measureAgain": "Measure again",
+    "unavailable": "Result unavailable."
   }
 }

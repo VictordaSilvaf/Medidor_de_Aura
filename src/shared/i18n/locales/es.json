@@ -28,7 +28,10 @@
     "measureCta": "Medir aura",
     "activeChallenge": "Challenge destacado",
     "seeAllChallenges": "Ver challenges",
-    "anonymous": "Perfil anónimo"
+    "anonymous": "Perfil anónimo",
+    "recentUploads": "Últimos uploads",
+    "seeAllUploads": "Ver todos",
+    "noUploads": "Aún no hay videos. Haz tu primera medición."
   },
   "settings": {
     "title": "Ajustes",
@@ -56,7 +59,7 @@
     "editTitle": "Editar perfil",
     "displayName": "Nombre",
     "username": "Username",
-    "usernameHint": "Solo minúsculas, números y _",
+    "usernameHint": "Letras, números y _ (3–24 caracteres)",
     "bio": "Bio",
     "publicProfile": "Perfil público",
     "levelXp": "Nivel {{level}} · {{xp}} XP",
@@ -64,7 +67,17 @@
     "edit": "Editar",
     "settings": "Ajustes",
     "usernameTaken": "Ese username ya está en uso.",
-    "usernameRequired": "El username es obligatorio."
+    "usernameRequired": "El username es obligatorio.",
+    "posts": "Posts",
+    "followers": "Seguidores",
+    "following": "Siguiendo",
+    "follow": "Seguir",
+    "unfollow": "Siguiendo",
+    "connections": "Conexiones",
+    "emptyFollowers": "Aún no hay seguidores.",
+    "emptyFollowing": "Aún no sigue a nadie.",
+    "noPosts": "Aún no hay posts públicos.",
+    "notFound": "Perfil no encontrado."
   },
   "preview": {
     "title": "Preview",
@@ -87,7 +100,8 @@
     "empty": "Nada público aún. Sé el primero en publicar.",
     "duel": "Duelo",
     "score": "+{{score}} aura",
-    "by": "@{{username}}"
+    "by": "@{{username}}",
+    "record": "Grabar"
   },
   "post": {
     "title": "Medición pública",
@@ -127,12 +141,35 @@
     "countdown": "Cuenta",
     "stop": "Parar",
     "getReady": "Prepárate",
-    "limitBadge": "Hasta 1:00 · 50 MB"
+    "limitBadge": "Hasta 1:00 · 50 MB",
+    "settingsIsland": "Ajustes",
+    "visibilityLabel": "Visibilidad",
+    "visibilityPublic": "Público",
+    "visibilityPrivate": "Privado",
+    "visibilityPublicHint": "Va al feed",
+    "visibilityPrivateHint": "Solo tú lo ves",
+    "countdownLabel": "Cuenta",
+    "countdownOff": "Off",
+    "countdownSeconds": "{{count}}s",
+    "cancelCountdown": "Cancelar",
+    "tapToCancel": "Toca fuera para cancelar"
   },
   "auth": {
     "loginTitle": "Entrar",
     "registerTitle": "Crear cuenta",
     "email": "Correo",
     "password": "Contraseña"
+  },
+  "uploads": {
+    "title": "Mis uploads",
+    "subtitle": "Historial de videos y análisis",
+    "empty": "Todavía no has subido ningún video.",
+    "newBadge": "NUEVO"
+  },
+  "reveal": {
+    "yourAura": "Tu aura es",
+    "share": "Compartir",
+    "measureAgain": "Medir de nuevo",
+    "unavailable": "Resultado no disponible."
   }
 }

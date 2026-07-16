@@ -1,20 +1,24 @@
 import Constants from 'expo-constants';
 import * as Device from 'expo-device';
-import * as Notifications from 'expo-notifications';
+import { isRunningInExpoGo } from 'expo';
 import { Platform } from 'react-native';
 
 import { supabase } from '@/src/features/auth/supabase';
 
 import { ensureNotificationPermission } from './permissions';
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowBanner: true,
-    shouldShowList: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-  }),
-});
+let handlerConfigured = false;
+
+/**
+ * Android Expo Go throws on any import of `expo-notifications` (SDK 53+).
+ * Push registration also requires a development build.
+ */
+export function canUseRemotePushNotifications(): boolean {
+  if (isRunningInExpoGo()) {
+    return false;
+  }
+  return true;
+}
 
 function resolveProjectId(): string | undefined {
   return (
@@ -28,8 +32,23 @@ function resolveProjectId(): string | undefined {
 export async function registerPushTokenForUser(
   userId: string,
 ): Promise<string | null> {
-  if (!Device.isDevice) {
+  if (!canUseRemotePushNotifications() || !Device.isDevice) {
     return null;
+  }
+
+  // Dynamic import keeps Expo Go (Android) from loading the broken module at boot.
+  const Notifications = await import('expo-notifications');
+
+  if (!handlerConfigured) {
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowBanner: true,
+        shouldShowList: true,
+        shouldPlaySound: true,
+        shouldSetBadge: false,
+      }),
+    });
+    handlerConfigured = true;
   }
 
   const permission = await ensureNotificationPermission();

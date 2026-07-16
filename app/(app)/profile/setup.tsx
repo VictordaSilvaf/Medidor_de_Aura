@@ -68,7 +68,7 @@ export default function ProfileSetupScreen() {
       <TextInput
         value={displayName}
         onChangeText={setDisplayName}
-        placeholder="Aura Rider"
+        placeholder="Nome completo"
         placeholderTextColor={palette.textDisabled}
         style={styles.input}
       />
@@ -79,7 +79,7 @@ export default function ProfileSetupScreen() {
         onChangeText={(v) => setUsername(normalizeUsername(v))}
         autoCapitalize="none"
         autoCorrect={false}
-        placeholder="aura_rider"
+        placeholder="sixseven_"
         placeholderTextColor={palette.textDisabled}
         style={styles.input}
       />

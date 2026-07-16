@@ -103,6 +103,36 @@ export async function fetchAnalysisResult(
   return data as VideoAnalysisResult | null;
 }
 
+export type AnalysisListItem = VideoAnalysis & {
+  result: VideoAnalysisResult | null;
+};
+
+/** Últimas análises do usuário com resultado (se completed). */
+export async function fetchMyAnalyses(
+  userId: string,
+  limit = 20,
+): Promise<AnalysisListItem[]> {
+  const { data, error } = await supabase
+    .from('video_analyses')
+    .select('*, video_analysis_results(*)')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(limit);
+
+  if (error) throw new Error(error.message);
+
+  return (data ?? []).map((row) => {
+    const { video_analysis_results: results, ...analysis } = row as VideoAnalysis & {
+      video_analysis_results: VideoAnalysisResult[] | VideoAnalysisResult | null;
+    };
+    const result = Array.isArray(results) ? (results[0] ?? null) : results;
+    return {
+      ...(analysis as VideoAnalysis),
+      result,
+    };
+  });
+}
+
 export async function submitPendingCapture(input: {
   uri: string;
   source: VideoSource;

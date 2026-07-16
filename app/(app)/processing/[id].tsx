@@ -49,7 +49,7 @@ export default function ProcessingScreen() {
   useEffect(() => {
     if (!analysis) return;
     if (analysis.status === 'completed') {
-      router.replace(`/(app)/result/${analysis.id}`);
+      router.replace(`/(app)/reveal/${analysis.id}`);
     }
   }, [analysis, router]);
 
@@ -74,8 +74,7 @@ export default function ProcessingScreen() {
 
       <Text style={styles.title}>{message}</Text>
       <Text style={styles.subtitle}>
-        Extraímos frames, áudio e movimentos. Você recebe um push quando
-        terminar.
+        Estamos processando seu vídeo. Você receberá uma notificação quando o resultado estiver pronto.
       </Text>
 
       {status === 'failed' ? (

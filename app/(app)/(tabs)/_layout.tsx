@@ -1,10 +1,9 @@
-import { Redirect, Tabs, useRouter } from 'expo-router';
+import { Redirect, Tabs } from 'expo-router';
 import {
   Home,
+  Newspaper,
   Swords,
   UserRound,
-  Newspaper,
-  Zap,
 } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
@@ -18,7 +17,6 @@ import { palette } from '@/src/shared/ui/theme';
 
 export default function TabsLayout() {
   const { t } = useTranslation();
-  const router = useRouter();
   const setupRequired = useAppSelector(selectSetupRequired);
   const profileLoading = useAppSelector(selectProfileLoading);
 
@@ -53,19 +51,17 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="feed"
+        name="challenges"
         options={{
-          title: t('tabs.feed'),
-          tabBarIcon: ({ color, size }) => (
-            <Newspaper color={color} size={size} />
-          ),
+          title: t('tabs.challenges'),
+          tabBarIcon: ({ color, size }) => <Swords color={color} size={size} />,
         }}
       />
       <Tabs.Screen
-        name="measure"
+        name="feed"
         options={{
-          title: t('tabs.measure'),
-          tabBarIcon: () => (
+          title: t('tabs.feed'),
+          tabBarIcon: ({ color }) => (
             <View
               style={{
                 width: 48,
@@ -75,25 +71,21 @@ export default function TabsLayout() {
                 backgroundColor: palette.primary,
                 alignItems: 'center',
                 justifyContent: 'center',
+                borderWidth: 2,
+                borderColor: `${palette.primary}99`,
               }}
             >
-              <Zap color="#FFF" size={22} strokeWidth={2.4} />
+              <Newspaper color="#FFF" size={22} strokeWidth={2.2} />
             </View>
           ),
           tabBarLabel: () => null,
-        }}
-        listeners={{
-          tabPress: (e) => {
-            e.preventDefault();
-            router.push('/(app)/capture');
-          },
+          tabBarActiveTintColor: palette.primary,
         }}
       />
       <Tabs.Screen
-        name="challenges"
+        name="measure"
         options={{
-          title: t('tabs.challenges'),
-          tabBarIcon: ({ color, size }) => <Swords color={color} size={size} />,
+          href: null,
         }}
       />
       <Tabs.Screen

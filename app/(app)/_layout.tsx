@@ -34,7 +34,11 @@ export default function AppLayout() {
       <Stack.Screen name="capture" options={{ animation: 'fade' }} />
       <Stack.Screen name="preview" options={{ animation: 'slide_from_bottom' }} />
       <Stack.Screen name="processing/[id]" options={{ animation: 'fade' }} />
+      <Stack.Screen name="reveal/[id]" options={{ animation: 'fade' }} />
       <Stack.Screen name="result/[id]" options={{ animation: 'fade' }} />
+      <Stack.Screen name="uploads" options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="user/[username]" options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="connections/[userId]" options={{ animation: 'slide_from_right' }} />
       <Stack.Screen name="settings" options={{ animation: 'slide_from_right' }} />
       <Stack.Screen name="profile/setup" options={{ animation: 'fade', gestureEnabled: false }} />
       <Stack.Screen name="profile/edit" options={{ animation: 'slide_from_right' }} />

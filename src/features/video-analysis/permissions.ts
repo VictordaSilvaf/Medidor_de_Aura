@@ -1,6 +1,6 @@
 import { Camera } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
-import * as Notifications from 'expo-notifications';
+import { isRunningInExpoGo } from 'expo';
 import { Linking, Platform } from 'react-native';
 
 export type PermissionKind = 'camera' | 'microphone' | 'library' | 'notifications';
@@ -9,6 +9,21 @@ export type PermissionResult = {
   granted: boolean;
   canAskAgain: boolean;
 };
+
+/**
+ * Any static/dynamic import of `expo-notifications` throws on Android Expo Go
+ * because of DevicePushTokenAutoRegistration side-effects (SDK 53+).
+ */
+function canLoadExpoNotifications(): boolean {
+  return !(isRunningInExpoGo() && Platform.OS === 'android');
+}
+
+async function loadNotifications() {
+  if (!canLoadExpoNotifications()) {
+    return null;
+  }
+  return import('expo-notifications');
+}
 
 async function requestCamera(): Promise<PermissionResult> {
   const current = await Camera.getCameraPermissionsAsync();
@@ -38,6 +53,11 @@ async function requestLibrary(): Promise<PermissionResult> {
 }
 
 async function requestNotifications(): Promise<PermissionResult> {
+  const Notifications = await loadNotifications();
+  if (!Notifications) {
+    return { granted: false, canAskAgain: false };
+  }
+
   const current = await Notifications.getPermissionsAsync();
   if (current.granted) {
     return { granted: true, canAskAgain: current.canAskAgain };
@@ -69,6 +89,11 @@ export async function ensureLibraryPermission(): Promise<PermissionResult> {
 }
 
 export async function ensureNotificationPermission(): Promise<PermissionResult> {
+  const Notifications = await loadNotifications();
+  if (!Notifications) {
+    return { granted: false, canAskAgain: false };
+  }
+
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync('analysis', {
       name: 'Análises de aura',

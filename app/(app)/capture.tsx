@@ -1,3 +1,4 @@
+import { BlurView } from 'expo-blur';
 import { CameraView } from 'expo-camera';
 import { useRouter } from 'expo-router';
 import {
@@ -7,6 +8,7 @@ import {
   X,
 } from 'lucide-react-native';
 import { useCallback, useEffect, useRef, useState, type ComponentRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Alert,
   Pressable,
@@ -24,11 +26,11 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useAppDispatch } from '@/src/core/hooks';
+import { useAppDispatch, useAppSelector } from '@/src/core/hooks';
+import { selectCountdownSeconds } from '@/src/features/prefs/prefsSlice';
 import {
   MAX_VIDEO_DURATION_MS,
   MAX_VIDEO_FILE_SIZE_BYTES,
-  RECORD_COUNTDOWN_SECONDS,
 } from '@/src/features/video-analysis/constants';
 import { setPendingCapture } from '@/src/features/video-analysis/pendingCaptureSlice';
 import {
@@ -37,6 +39,7 @@ import {
 } from '@/src/features/video-analysis/permissions';
 import { pickGalleryVideo } from '@/src/features/video-analysis/pickGalleryVideo';
 import { validateVideoMeta } from '@/src/features/video-analysis/validateVideo';
+import { CaptureSettingsIsland } from '@/src/shared/ui/CaptureSettingsIsland';
 import { GradientButton } from '@/src/shared/ui/GradientButton';
 import { fonts, palette } from '@/src/shared/ui/theme';
 
@@ -50,16 +53,19 @@ function formatSeconds(ms: number) {
 }
 
 export default function CaptureScreen() {
+  const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const dispatch = useAppDispatch();
   const cameraRef = useRef<ComponentRef<typeof CameraView>>(null);
 
+  const countdownSeconds = useAppSelector(selectCountdownSeconds);
+
   const [facing, setFacing] = useState<'front' | 'back'>('front');
   const [ready, setReady] = useState(false);
   const [permissionOk, setPermissionOk] = useState<boolean | null>(null);
   const [phase, setPhase] = useState<Phase>('idle');
-  const [countdown, setCountdown] = useState(RECORD_COUNTDOWN_SECONDS);
+  const [countdown, setCountdown] = useState<number>(countdownSeconds);
   const [elapsedMs, setElapsedMs] = useState(0);
 
   const pulse = useSharedValue(1);
@@ -162,13 +168,27 @@ export default function CaptureScreen() {
     }
   }, [clearTimers, goToPreview, pulse, ready]);
 
+  const cancelCountdown = useCallback(() => {
+    if (phase !== 'countdown') return;
+    clearTimers();
+    setPhase('idle');
+    setCountdown(countdownSeconds);
+    pulse.set(withTiming(1, { duration: 150 }));
+  }, [clearTimers, countdownSeconds, phase, pulse]);
+
   const beginCountdown = useCallback(() => {
     if (phase !== 'idle' || !ready) return;
     clearTimers();
-    setPhase('countdown');
-    setCountdown(RECORD_COUNTDOWN_SECONDS);
 
-    let remaining = RECORD_COUNTDOWN_SECONDS;
+    if (countdownSeconds <= 0) {
+      void startRecording();
+      return;
+    }
+
+    setPhase('countdown');
+    setCountdown(countdownSeconds);
+
+    let remaining = countdownSeconds;
     const tick = setInterval(() => {
       remaining -= 1;
       setCountdown(remaining);
@@ -178,12 +198,28 @@ export default function CaptureScreen() {
       }
     }, 1000);
     timersRef.current.push(tick);
-  }, [clearTimers, phase, ready, startRecording]);
+  }, [clearTimers, countdownSeconds, phase, ready, startRecording]);
 
   const stopRecording = useCallback(() => {
     if (phase !== 'recording') return;
     cameraRef.current?.stopRecording();
   }, [phase]);
+
+  const handlePrimaryControl = useCallback(() => {
+    if (phase === 'recording') {
+      stopRecording();
+      return;
+    }
+    if (phase === 'countdown') {
+      cancelCountdown();
+      return;
+    }
+    beginCountdown();
+  }, [beginCountdown, cancelCountdown, phase, stopRecording]);
+
+  let controlLabel = t('capture.record');
+  if (phase === 'recording') controlLabel = t('capture.stop');
+  else if (phase === 'countdown') controlLabel = t('capture.cancelCountdown');
 
   const handleGallery = useCallback(async () => {
     try {
@@ -246,6 +282,7 @@ export default function CaptureScreen() {
           facing={facing}
           mode="video"
           mute={false}
+          mirror={facing === 'front'}
           videoQuality="720p"
           onCameraReady={() => setReady(true)}
         />
@@ -259,6 +296,7 @@ export default function CaptureScreen() {
           accessibilityLabel="Fechar"
           onPress={() => {
             if (phase === 'recording') stopRecording();
+            if (phase === 'countdown') cancelCountdown();
             clearTimers();
             router.back();
           }}
@@ -288,64 +326,83 @@ export default function CaptureScreen() {
       </View>
 
       {phase === 'countdown' ? (
-        <Animated.View
-          entering={ZoomIn.springify().damping(14)}
-          exiting={FadeOut.duration(120)}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('capture.cancelCountdown')}
+          onPress={cancelCountdown}
           style={styles.countdownOverlay}
         >
-          <Text style={styles.countdownNumber}>{countdown}</Text>
-          <Text style={styles.countdownHint}>Prepare-se</Text>
-        </Animated.View>
-      ) : null}
-
-      <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 20 }]}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Enviar vídeo da galeria"
-          disabled={phase !== 'idle'}
-          onPress={() => void handleGallery()}
-          style={styles.sideAction}
-        >
-          <ImagePlus size={22} color={palette.textPrimary} strokeWidth={1.8} />
-          <Text style={styles.sideLabel}>Galeria</Text>
-        </Pressable>
-
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={
-            phase === 'recording' ? 'Parar gravação' : 'Iniciar gravação'
-          }
-          disabled={!ready || phase === 'countdown'}
-          onPress={() => {
-            if (phase === 'recording') stopRecording();
-            else beginCountdown();
-          }}
-        >
           <Animated.View
-            style={[
-              styles.recordOuter,
-              phase === 'recording' && styles.recordOuterActive,
-              recordButtonStyle,
-            ]}
+            entering={ZoomIn.springify().damping(14)}
+            exiting={FadeOut.duration(120)}
+            style={styles.countdownContent}
           >
-            <View
-              style={[
-                styles.recordInner,
-                phase === 'recording' && styles.recordInnerStop,
-              ]}
-            />
+            <Text style={styles.countdownNumber}>{countdown}</Text>
+            <Text style={styles.countdownHint}>{t('capture.getReady')}</Text>
+            <Text style={styles.countdownCancelHint}>
+              {t('capture.tapToCancel')}
+            </Text>
           </Animated.View>
         </Pressable>
+      ) : null}
 
-        <View style={styles.sideAction}>
-          <Animated.Text entering={FadeIn} style={styles.sideLabel}>
-            {phase === 'idle'
-              ? 'Gravar'
-              : phase === 'countdown'
-                ? 'Contagem'
-                : 'Parar'}
-          </Animated.Text>
-        </View>
+      <View style={[styles.island, { bottom: insets.bottom + 20 }]}>
+        <BlurView intensity={42} tint="dark" style={styles.islandBlur}>
+          <View
+            pointerEvents={phase === 'idle' ? 'auto' : 'none'}
+            style={phase === 'idle' ? undefined : styles.settingsLocked}
+          >
+            <CaptureSettingsIsland disabled={phase !== 'idle'} />
+          </View>
+
+          <View style={styles.islandDivider} />
+
+          <View style={styles.controls}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Enviar vídeo da galeria"
+              disabled={phase !== 'idle'}
+              onPress={() => void handleGallery()}
+              style={[
+                styles.sideAction,
+                phase !== 'idle' && styles.sideActionDisabled,
+              ]}
+            >
+              <ImagePlus size={22} color={palette.textPrimary} strokeWidth={1.8} />
+              <Text style={styles.sideLabel}>{t('capture.gallery')}</Text>
+            </Pressable>
+
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={controlLabel}
+              disabled={!ready && phase === 'idle'}
+              onPress={handlePrimaryControl}
+            >
+              <Animated.View
+                style={[
+                  styles.recordOuter,
+                  (phase === 'recording' || phase === 'countdown') &&
+                    styles.recordOuterActive,
+                  recordButtonStyle,
+                ]}
+              >
+                <View
+                  style={[
+                    styles.recordInner,
+                    (phase === 'recording' || phase === 'countdown') &&
+                      styles.recordInnerStop,
+                  ]}
+                />
+              </Animated.View>
+            </Pressable>
+
+            <View style={styles.sideAction}>
+              <Animated.Text entering={FadeIn} style={styles.sideLabel}>
+                {controlLabel}
+              </Animated.Text>
+            </View>
+          </View>
+        </BlurView>
       </View>
     </View>
   );
@@ -411,6 +468,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: 'rgba(9,9,11,0.55)',
   },
+  countdownContent: {
+    alignItems: 'center',
+  },
   countdownNumber: {
     color: '#FFFFFF',
     fontFamily: fonts.bold,
@@ -425,13 +485,45 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     marginTop: 8,
   },
-  bottomBar: {
+  countdownCancelHint: {
+    color: palette.textDisabled,
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    marginTop: 16,
+  },
+  island: {
     position: 'absolute',
     left: 0,
     right: 0,
-    bottom: 0,
-    zIndex: 2,
-    paddingHorizontal: 28,
+    zIndex: 4,
+    alignItems: 'center',
+    paddingHorizontal: 16,
+  },
+  islandBlur: {
+    width: '100%',
+    maxWidth: 420,
+    borderRadius: 26,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: palette.borderSubtle,
+    backgroundColor: 'rgba(22,22,31,0.55)',
+    shadowColor: '#6D5DFC',
+    shadowOpacity: 0.28,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 8,
+  },
+  settingsLocked: {
+    opacity: 0.55,
+  },
+  islandDivider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: palette.borderSubtle,
+    marginHorizontal: 8,
+  },
+  controls: {
+    paddingHorizontal: 24,
+    paddingVertical: 16,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -440,6 +532,9 @@ const styles = StyleSheet.create({
     width: 72,
     alignItems: 'center',
     gap: 6,
+  },
+  sideActionDisabled: {
+    opacity: 0.4,
   },
   sideLabel: {
     color: palette.textSecondary,
