@@ -15,7 +15,12 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.medidordeaura.app"
+      "bundleIdentifier": "com.medidordeaura.app",
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "remote-notification"
+        ]
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -25,7 +30,13 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.medidordeaura.app"
+      "package": "com.medidordeaura.app",
+      "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO",
+        "READ_MEDIA_VIDEO",
+        "POST_NOTIFICATIONS"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -42,11 +53,48 @@
           "image": "./assets/splash-icon.png",
           "imageWidth": 200
         }
-      ]
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "O Medidor de Aura precisa da câmera para gravar sua leitura.",
+          "microphonePermission": "O Medidor de Aura precisa do microfone para analisar o áudio da leitura.",
+          "recordAudioAndroid": true,
+          "barcodeScannerEnabled": false
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "O Medidor de Aura precisa acessar seus vídeos para enviar uma leitura.",
+          "microphonePermission": "O Medidor de Aura precisa do microfone para analisar o áudio da leitura."
+        }
+      ],
+      [
+        "expo-video",
+        {
+          "supportsBackgroundPlayback": false,
+          "supportsPictureInPicture": false
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#6D5DFC",
+          "defaultChannel": "analysis"
+        }
+      ],
+      "expo-localization"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": ""
+      }
     }
   }
 }

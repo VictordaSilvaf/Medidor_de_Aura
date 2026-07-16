@@ -5,6 +5,9 @@ import {
 } from '@/src/features/auth/authSlice';
 import { supabase } from '@/src/features/auth/supabase';
 import type { AppDispatch } from '@/src/core/store';
+import { bootstrapProfile } from '@/src/features/social/profileApi';
+import { setMyProfile } from '@/src/features/social/profileSlice';
+import { registerPushTokenForUser } from '@/src/features/video-analysis/pushNotifications';
 
 export async function bootstrapAuth(dispatch: AppDispatch) {
   dispatch(setAuthLoading());
@@ -12,14 +15,27 @@ export async function bootstrapAuth(dispatch: AppDispatch) {
   const { data, error } = await supabase.auth.getSession();
   if (error) {
     dispatch(clearSession());
+    dispatch(setMyProfile(null));
   } else {
     dispatch(setSession({ session: data.session }));
+    if (data.session?.user.id) {
+      void registerPushTokenForUser(data.session.user.id);
+      void bootstrapProfile(dispatch, data.session.user.id);
+    } else {
+      dispatch(setMyProfile(null));
+    }
   }
 
   const {
     data: { subscription },
   } = supabase.auth.onAuthStateChange((_event, session) => {
     dispatch(setSession({ session }));
+    if (session?.user.id) {
+      void registerPushTokenForUser(session.user.id);
+      void bootstrapProfile(dispatch, session.user.id);
+    } else {
+      dispatch(setMyProfile(null));
+    }
   });
 
   return () => {

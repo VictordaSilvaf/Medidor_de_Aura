@@ -30,6 +30,10 @@ const envSchema = z
       emptyToUndefined,
       z.string().optional(),
     ),
+    EXPO_PUBLIC_EAS_PROJECT_ID: z.preprocess(
+      emptyToUndefined,
+      z.string().optional(),
+    ),
   })
   .refine(
     (data) =>
@@ -58,6 +62,7 @@ function readEnv(): AppEnv {
       process.env.EXPO_PUBLIC_REVENUECAT_API_KEY_IOS,
     EXPO_PUBLIC_REVENUECAT_API_KEY_ANDROID:
       process.env.EXPO_PUBLIC_REVENUECAT_API_KEY_ANDROID,
+    EXPO_PUBLIC_EAS_PROJECT_ID: process.env.EXPO_PUBLIC_EAS_PROJECT_ID,
   });
 
   if (!parsed.success) {
