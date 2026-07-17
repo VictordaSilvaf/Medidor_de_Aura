@@ -54,8 +54,11 @@ const prefsSlice = createSlice({
     },
     markRevealSeen(state, action: PayloadAction<string>) {
       const id = action.payload;
-      if (!state.seenRevealIds.includes(id)) {
-        state.seenRevealIds = [id, ...state.seenRevealIds].slice(0, 100);
+      const seen = Array.isArray(state.seenRevealIds)
+        ? state.seenRevealIds
+        : [];
+      if (!seen.includes(id)) {
+        state.seenRevealIds = [id, ...seen].slice(0, 100);
       }
     },
   },
@@ -90,5 +93,9 @@ export const selectPushEnabled = (state: { prefs: PrefsState }) =>
 export const selectCountdownSeconds = (state: { prefs: PrefsState }) =>
   state.prefs.countdownSeconds;
 
+const EMPTY_SEEN_REVEAL_IDS: string[] = [];
+
 export const selectSeenRevealIds = (state: { prefs: PrefsState }) =>
-  state.prefs.seenRevealIds;
+  Array.isArray(state.prefs.seenRevealIds)
+    ? state.prefs.seenRevealIds
+    : EMPTY_SEEN_REVEAL_IDS;

@@ -1,10 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { Grid3X3, Pencil, Settings } from 'lucide-react-native';
+import { Grid3X3, Pencil, Settings, Crown } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Alert,
+  Image,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -22,10 +24,18 @@ import {
 } from '@/src/features/social/followApi';
 import {
   selectMyProfile,
+  selectSubscriptionTier,
   setMyProfile,
 } from '@/src/features/social/profileSlice';
+import {
+  isPaidTier,
+  SUBSCRIPTION_TIER_COLORS,
+  tierLabelKey,
+} from '@/src/features/monetization/subscriptionTiers';
 import { scoreColor } from '@/src/features/video-analysis/statusUi';
+import { AppMenuButton } from '@/src/shared/ui/AppMenuSheet';
 import { GradientButton } from '@/src/shared/ui/GradientButton';
+import { UserAvatar } from '@/src/shared/ui/UserAvatar';
 import { fonts, palette } from '@/src/shared/ui/theme';
 
 function StatTap({
@@ -51,6 +61,7 @@ export default function ProfileTabScreen() {
   const insets = useSafeAreaInsets();
   const dispatch = useAppDispatch();
   const profile = useAppSelector(selectMyProfile);
+  const subscriptionTier = useAppSelector(selectSubscriptionTier);
 
   const { data: counts, isLoading: countsLoading } = useQuery({
     queryKey: ['social-counts', profile?.user_id],
@@ -79,9 +90,8 @@ export default function ProfileTabScreen() {
   return (
     <View style={[styles.root, { paddingTop: insets.top + 8 }]}>
       <View style={styles.topBar}>
-        <Text style={styles.topUsername}>
-          @{profile?.username ?? '—'}
-        </Text>
+        <AppMenuButton />
+        <Text style={styles.topUsername}>@{profile?.username ?? '—'}</Text>
         <Pressable
           onPress={() => router.push('/(app)/settings')}
           style={styles.iconBtn}
@@ -93,124 +103,168 @@ export default function ProfileTabScreen() {
       <ScrollView
         contentContainerStyle={{
           paddingBottom: insets.bottom + 28,
-          paddingHorizontal: 16,
         }}
       >
-        <View style={styles.identity}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarLetter}>
-              {(profile?.display_name ?? '?').slice(0, 1).toUpperCase()}
-            </Text>
+        <View style={styles.bannerWrap}>
+          {profile?.banner_url ? (
+            <Image source={{ uri: profile.banner_url }} style={styles.banner} />
+          ) : (
+            <LinearGradient
+              colors={['#1C1C24', '#2A1F4D', '#6D5DFC55']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.banner}
+            />
+          )}
+        </View>
+
+        <View style={styles.body}>
+          <View style={styles.identity}>
+            <UserAvatar
+              uri={profile?.avatar_url}
+              name={profile?.display_name}
+              size={86}
+              style={styles.avatarOverlap}
+            />
+            <View style={styles.statsRow}>
+              {countsLoading ? (
+                <ActivityIndicator color={palette.primary} />
+              ) : (
+                <>
+                  <StatTap
+                    value={counts?.posts ?? 0}
+                    label={t('profile.posts')}
+                  />
+                  <StatTap
+                    value={counts?.followers ?? 0}
+                    label={t('profile.followers')}
+                    onPress={() =>
+                      profile &&
+                      router.push({
+                        pathname: '/(app)/connections/[userId]',
+                        params: { userId: profile.user_id, tab: 'followers' },
+                      })
+                    }
+                  />
+                  <StatTap
+                    value={counts?.following ?? 0}
+                    label={t('profile.following')}
+                    onPress={() =>
+                      profile &&
+                      router.push({
+                        pathname: '/(app)/connections/[userId]',
+                        params: { userId: profile.user_id, tab: 'following' },
+                      })
+                    }
+                  />
+                </>
+              )}
+            </View>
           </View>
-          <View style={styles.statsRow}>
-            {countsLoading ? (
-              <ActivityIndicator color={palette.primary} />
-            ) : (
-              <>
-                <StatTap
-                  value={counts?.posts ?? 0}
-                  label={t('profile.posts')}
-                />
-                <StatTap
-                  value={counts?.followers ?? 0}
-                  label={t('profile.followers')}
-                  onPress={() =>
-                    profile &&
-                    router.push({
-                      pathname: '/(app)/connections/[userId]',
-                      params: { userId: profile.user_id, tab: 'followers' },
-                    })
-                  }
-                />
-                <StatTap
-                  value={counts?.following ?? 0}
-                  label={t('profile.following')}
-                  onPress={() =>
-                    profile &&
-                    router.push({
-                      pathname: '/(app)/connections/[userId]',
-                      params: { userId: profile.user_id, tab: 'following' },
-                    })
-                  }
-                />
-              </>
-            )}
-          </View>
-        </View>
 
-        <Text style={styles.name}>{profile?.display_name ?? '—'}</Text>
-        <Text style={styles.levelLine}>
-          {t('profile.levelXp', {
-            level: profile?.level ?? 1,
-            xp: profile?.xp ?? 0,
-          })}
-          {' · '}
-          {t('profile.aura', { count: profile?.total_aura ?? 0 })}
-        </Text>
-        {profile?.bio ? <Text style={styles.bio}>{profile.bio}</Text> : null}
-
-        <View style={styles.actions}>
-          <GradientButton
-            title={t('profile.edit')}
-            icon={<Pencil size={16} color="#FFF" />}
-            onPress={() => router.push('/(app)/profile/edit')}
-            style={{ flex: 1 }}
-          />
-          <GradientButton
-            title={t('common.signOut')}
-            variant="ghost"
-            onPress={() => void handleSignOut()}
-            style={{ flex: 1 }}
-          />
-        </View>
-
-        <View style={styles.gridHeader}>
-          <Grid3X3 size={16} color={palette.textSecondary} />
-          <Text style={styles.gridTitle}>{t('profile.posts')}</Text>
-        </View>
-
-        {postsLoading ? (
-          <ActivityIndicator color={palette.primary} style={{ marginTop: 24 }} />
-        ) : posts.length === 0 ? (
-          <Text style={styles.emptyGrid}>{t('profile.noPosts')}</Text>
-        ) : (
-          <View style={styles.grid}>
-            {posts.map((post) => {
-              const tier = TIER_BY_ID[post.tier_id as keyof typeof TIER_BY_ID];
-              return (
-                <Pressable
-                  key={post.id}
-                  style={styles.gridCell}
-                  onPress={() => router.push(`/(app)/post/${post.id}`)}
-                >
-                  <View
-                    style={[
-                      styles.gridInner,
-                      { borderColor: `${tier?.color ?? palette.primary}55` },
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.gridTier,
-                        { color: tier?.color ?? palette.textPrimary },
-                      ]}
-                    >
-                      {tier?.label ?? post.tier_id}
-                    </Text>
-                    <Text
-                      style={[
-                        styles.gridScore,
-                        { color: scoreColor(post.score) },
-                      ]}
-                    >
-                      +{post.score}
-                    </Text>
-                  </View>
-                </Pressable>
-              );
+          <Text style={styles.name}>{profile?.display_name ?? '—'}</Text>
+          {isPaidTier(subscriptionTier) ? (
+            <View
+              style={[
+                styles.vipBadge,
+                { borderColor: `${SUBSCRIPTION_TIER_COLORS[subscriptionTier]}55` },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.vipBadgeText,
+                  { color: SUBSCRIPTION_TIER_COLORS[subscriptionTier] },
+                ]}
+              >
+                {t('premium.badge', { tier: t(tierLabelKey(subscriptionTier)) })}
+              </Text>
+            </View>
+          ) : null}
+          <Text style={styles.levelLine}>
+            {t('profile.levelXp', {
+              level: profile?.level ?? 1,
+              xp: profile?.xp ?? 0,
             })}
+            {' · '}
+            {t('profile.aura', { count: profile?.total_aura ?? 0 })}
+          </Text>
+          {profile?.bio ? <Text style={styles.bio}>{profile.bio}</Text> : null}
+
+          {!isPaidTier(subscriptionTier) ? (
+            <GradientButton
+              title={t('premium.ctaHub')}
+              icon={<Crown size={16} color="#FFF" />}
+              onPress={() => router.push('/(app)/premium')}
+              style={{ marginBottom: 12 }}
+            />
+          ) : null}
+
+          <View style={styles.actions}>
+            <GradientButton
+              title={t('profile.edit')}
+              icon={<Pencil size={16} color="#FFF" />}
+              onPress={() => router.push('/(app)/profile/edit')}
+              style={{ flex: 1 }}
+            />
+            <GradientButton
+              title={t('common.signOut')}
+              variant="ghost"
+              onPress={() => void handleSignOut()}
+              style={{ flex: 1 }}
+            />
           </View>
-        )}
+
+          <View style={styles.gridHeader}>
+            <Grid3X3 size={16} color={palette.textSecondary} />
+            <Text style={styles.gridTitle}>{t('profile.posts')}</Text>
+          </View>
+
+          {postsLoading ? (
+            <ActivityIndicator
+              color={palette.primary}
+              style={{ marginTop: 24 }}
+            />
+          ) : posts.length === 0 ? (
+            <Text style={styles.emptyGrid}>{t('profile.noPosts')}</Text>
+          ) : (
+            <View style={styles.grid}>
+              {posts.map((post) => {
+                const tier = TIER_BY_ID[post.tier_id as keyof typeof TIER_BY_ID];
+                return (
+                  <Pressable
+                    key={post.id}
+                    style={styles.gridCell}
+                    onPress={() => router.push(`/(app)/post/${post.id}`)}
+                  >
+                    <View
+                      style={[
+                        styles.gridInner,
+                        { borderColor: `${tier?.color ?? palette.primary}55` },
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.gridTier,
+                          { color: tier?.color ?? palette.textPrimary },
+                        ]}
+                      >
+                        {tier?.label ?? post.tier_id}
+                      </Text>
+                      <Text
+                        style={[
+                          styles.gridScore,
+                          { color: scoreColor(post.score) },
+                        ]}
+                      >
+                        +{post.score}
+                      </Text>
+                    </View>
+                  </Pressable>
+                );
+              })}
+            </View>
+          )}
+        </View>
       </ScrollView>
     </View>
   );
@@ -223,7 +277,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    marginBottom: 12,
+    marginBottom: 8,
   },
   topUsername: {
     color: palette.textPrimary,
@@ -239,31 +293,31 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: palette.borderSubtle,
   },
+  bannerWrap: {
+    height: 120,
+    overflow: 'hidden',
+  },
+  banner: {
+    width: '100%',
+    height: '100%',
+  },
+  body: { paddingHorizontal: 16 },
   identity: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-end',
     gap: 18,
+    marginTop: -36,
     marginBottom: 14,
   },
-  avatar: {
-    width: 86,
-    height: 86,
-    borderRadius: 43,
-    backgroundColor: `${palette.primary}33`,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: `${palette.primary}66`,
-  },
-  avatarLetter: {
-    color: palette.primary,
-    fontFamily: fonts.bold,
-    fontSize: 34,
+  avatarOverlap: {
+    borderWidth: 3,
+    borderColor: palette.bg,
   },
   statsRow: {
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-around',
+    paddingBottom: 8,
   },
   stat: { alignItems: 'center', minWidth: 64 },
   statValue: {
@@ -282,6 +336,20 @@ const styles = StyleSheet.create({
     color: palette.textPrimary,
     fontFamily: fonts.semibold,
     fontSize: 16,
+  },
+  vipBadge: {
+    alignSelf: 'flex-start',
+    marginTop: 6,
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  vipBadgeText: {
+    fontFamily: fonts.semibold,
+    fontSize: 11,
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
   },
   levelLine: {
     color: palette.textSecondary,

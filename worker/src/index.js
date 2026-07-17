@@ -46,6 +46,7 @@ async function claimNextJob() {
     .from('video_analyses')
     .select('*')
     .eq('status', 'queued')
+    .order('priority', { ascending: false })
     .order('created_at', { ascending: true })
     .limit(5);
 

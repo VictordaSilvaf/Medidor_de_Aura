@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { ChevronRight, Film, Settings, Zap } from 'lucide-react-native';
+import { ChevronRight, Crown, Film, Settings, Zap } from 'lucide-react-native';
 import { useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
@@ -15,7 +15,7 @@ import { selectAuraStats } from '@/src/features/aura/auraSlice';
 import { TIER_BY_ID } from '@/src/features/aura/tiers';
 import { selectAuthUser } from '@/src/features/auth/authSlice';
 import { selectSeenRevealIds } from '@/src/features/prefs/prefsSlice';
-import { selectMyProfile } from '@/src/features/social/profileSlice';
+import { selectMyProfile, selectIsPremium } from '@/src/features/social/profileSlice';
 import { fetchChallenges } from '@/src/features/social/socialApi';
 import {
   localizeChallengeText,
@@ -32,6 +32,7 @@ import {
 } from '@/src/features/video-analysis/statusUi';
 import { GlowCard } from '@/src/shared/ui/GlowCard';
 import { GradientButton } from '@/src/shared/ui/GradientButton';
+import { AppMenuButton } from '@/src/shared/ui/AppMenuSheet';
 import { fonts, palette } from '@/src/shared/ui/theme';
 
 function StatBlock({
@@ -88,6 +89,7 @@ export default function HubScreen() {
   const profile = useAppSelector(selectMyProfile);
   const localStats = useAppSelector(selectAuraStats);
   const seenIds = useAppSelector(selectSeenRevealIds);
+  const isPremium = useAppSelector(selectIsPremium);
   const autoRevealDone = useRef(false);
 
   const totalAura = profile?.total_aura ?? localStats.totalAura;
@@ -169,19 +171,22 @@ export default function HubScreen() {
                 : t('hub.anonymous')}
             </Text>
           </VStack>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('profile.settings')}
-            onPress={() => router.push('/(app)/settings')}
-            hitSlop={10}
-            style={styles.iconButton}
-          >
-            <Settings
-              size={18}
-              color={palette.textSecondary}
-              strokeWidth={1.8}
-            />
-          </Pressable>
+          <HStack space="sm" className="items-center">
+            <AppMenuButton />
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('profile.settings')}
+              onPress={() => router.push('/(app)/settings')}
+              hitSlop={10}
+              style={styles.iconButton}
+            >
+              <Settings
+                size={18}
+                color={palette.textSecondary}
+                strokeWidth={1.8}
+              />
+            </Pressable>
+          </HStack>
         </HStack>
 
         <GlowCard glowColor={orbGlow}>
@@ -307,6 +312,23 @@ export default function HubScreen() {
           )}
         </View>
 
+        {!isPremium ? (
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => router.push('/(app)/premium')}
+            style={styles.premiumCta}
+          >
+            <View style={styles.premiumCtaIcon}>
+              <Crown size={18} color={palette.neon} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.premiumCtaTitle}>{t('premium.ctaHub')}</Text>
+              <Text style={styles.premiumCtaBody}>{t('premium.heroBody')}</Text>
+            </View>
+            <ChevronRight size={18} color={palette.textSecondary} />
+          </Pressable>
+        ) : null}
+
         <GradientButton
           title={t('hub.measureCta')}
           icon={<Zap size={20} color="#FFFFFF" strokeWidth={2.2} />}
@@ -325,9 +347,9 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: palette.surface,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
-    backgroundColor: 'rgba(255,255,255,0.03)',
+    borderColor: palette.borderSubtle,
   },
   divider: {
     width: 1,
@@ -449,5 +471,37 @@ const styles = StyleSheet.create({
     color: palette.textDisabled,
     fontFamily: fonts.medium,
     fontSize: 14,
+  },
+  premiumCta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: `${palette.neon}44`,
+    backgroundColor: `${palette.neon}10`,
+    marginBottom: 4,
+  },
+  premiumCtaIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.04)',
+  },
+  premiumCtaTitle: {
+    color: palette.textPrimary,
+    fontFamily: fonts.semibold,
+    fontSize: 14,
+  },
+  premiumCtaBody: {
+    color: palette.textSecondary,
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    marginTop: 2,
+    lineHeight: 16,
   },
 });

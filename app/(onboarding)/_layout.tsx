@@ -10,7 +10,7 @@ export default function OnboardingLayout() {
 
   if (hasCompletedOnboarding) {
     return (
-      <Redirect href={isAuthenticated ? '/(app)' : '/(auth)/login'} />
+      <Redirect href={isAuthenticated ? '/(app)/(tabs)' : '/(auth)/login'} />
     );
   }
 

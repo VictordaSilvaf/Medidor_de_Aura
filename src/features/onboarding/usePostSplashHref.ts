@@ -13,7 +13,7 @@ export function usePostSplashHref(): Href {
   }
 
   if (isAuthenticated) {
-    return '/(app)';
+    return '/(app)/(tabs)';
   }
 
   return '/(auth)/login';

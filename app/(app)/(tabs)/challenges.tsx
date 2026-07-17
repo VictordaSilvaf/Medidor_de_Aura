@@ -16,6 +16,7 @@ import {
   localizeChallengeText,
   type Challenge,
 } from '@/src/features/social/types';
+import { AppMenuButton } from '@/src/shared/ui/AppMenuSheet';
 import { fonts, palette } from '@/src/shared/ui/theme';
 
 function ChallengeCard({
@@ -59,7 +60,11 @@ export default function ChallengesScreen() {
 
   return (
     <View style={[styles.root, { paddingTop: insets.top + 16 }]}>
-      <Text style={styles.screenTitle}>{t('challenges.title')}</Text>
+      <View style={styles.header}>
+        <AppMenuButton />
+        <Text style={styles.screenTitle}>{t('challenges.title')}</Text>
+        <View style={{ width: 40 }} />
+      </View>
       {isLoading ? (
         <ActivityIndicator color={palette.primary} style={{ marginTop: 40 }} />
       ) : (
@@ -91,12 +96,17 @@ export default function ChallengesScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: palette.bg },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    marginBottom: 16,
+  },
   screenTitle: {
     color: palette.textPrimary,
     fontFamily: fonts.bold,
     fontSize: 24,
-    paddingHorizontal: 20,
-    marginBottom: 16,
   },
   empty: {
     color: palette.textSecondary,

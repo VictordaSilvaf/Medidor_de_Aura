@@ -8,8 +8,11 @@ import { useVideoPlayer, VideoView } from 'expo-video';
 
 import { useAppDispatch, useAppSelector } from '@/src/core/hooks';
 import { selectDefaultVisibility } from '@/src/features/prefs/prefsSlice';
+import { isQuotaExceededError } from '@/src/features/monetization/quotaErrors';
 import type { VideoVisibility } from '@/src/features/social/types';
-import { submitPendingCapture } from '@/src/features/video-analysis/analysisApi';
+import {
+  submitPendingCapture,
+} from '@/src/features/video-analysis/analysisApi';
 import {
   clearActiveChallengeId,
   clearPendingCapture,
@@ -57,6 +60,20 @@ export default function PreviewScreen() {
       dispatch(clearActiveChallengeId());
       router.replace(`/(app)/processing/${analysis.id}`);
     } catch (error) {
+      if (isQuotaExceededError(error)) {
+        setUploading(false);
+        Alert.alert(t('quota.title'), t('quota.body', {
+          daily: error.dailyUsed,
+          monthly: error.monthlyUsed,
+        }), [
+          { text: t('common.cancel'), style: 'cancel' },
+          {
+            text: t('premium.upgrade'),
+            onPress: () => router.push('/(app)/premium'),
+          },
+        ]);
+        return;
+      }
       const message =
         error instanceof Error ? error.message : t('common.error');
       Alert.alert(t('common.error'), message);

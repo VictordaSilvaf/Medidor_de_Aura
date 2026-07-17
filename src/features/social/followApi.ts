@@ -1,5 +1,9 @@
 import { supabase } from '@/src/features/auth/supabase';
 
+import {
+  fetchBlockedUserIds,
+  sendSocialPush,
+} from './notificationsApi';
 import type { Profile } from './types';
 
 export type SocialCounts = {
@@ -55,6 +59,7 @@ export async function followUser(
     { onConflict: 'follower_id,following_id' },
   );
   if (error) throw new Error(error.message);
+  void sendSocialPush({ type: 'follow', targetUserId: followingId });
 }
 
 export async function unfollowUser(
@@ -123,7 +128,7 @@ async function hydrateProfiles(userIds: string[]): Promise<FollowListItem[]> {
 export async function fetchPublicPostsGrid(userId: string, limit = 30) {
   const { data: analyses, error } = await supabase
     .from('video_analyses')
-    .select('id, created_at, posted_at')
+    .select('id, created_at, posted_at, like_count, comment_count')
     .eq('user_id', userId)
     .eq('visibility', 'public')
     .eq('status', 'completed')
@@ -151,6 +156,8 @@ export async function fetchPublicPostsGrid(userId: string, limit = 30) {
         score: r.score as number,
         tier_id: r.tier_id as string,
         created_at: a.created_at as string,
+        like_count: Number(a.like_count ?? 0),
+        comment_count: Number(a.comment_count ?? 0),
       };
     })
     .filter(Boolean) as {
@@ -158,6 +165,8 @@ export async function fetchPublicPostsGrid(userId: string, limit = 30) {
     score: number;
     tier_id: string;
     created_at: string;
+    like_count: number;
+    comment_count: number;
   }[];
 }
 
@@ -179,6 +188,12 @@ export async function fetchPublicProfileBundle(
     .maybeSingle();
   if (error) throw new Error(error.message);
   if (!profile) return null;
+  if (
+    viewerId &&
+    (await fetchBlockedUserIds(viewerId)).has(profile.user_id as string)
+  ) {
+    return null;
+  }
 
   const [counts, posts, following] = await Promise.all([
     fetchSocialCounts(profile.user_id),

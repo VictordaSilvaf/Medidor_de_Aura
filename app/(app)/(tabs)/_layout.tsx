@@ -2,6 +2,7 @@ import { Redirect, Tabs } from 'expo-router';
 import {
   Home,
   Newspaper,
+  Search,
   Swords,
   UserRound,
 } from 'lucide-react-native';
@@ -86,6 +87,15 @@ export default function TabsLayout() {
         name="measure"
         options={{
           href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="search"
+        options={{
+          title: t('tabs.search'),
+          tabBarIcon: ({ color, size }) => (
+            <Search color={color} size={size} />
+          ),
         }}
       />
       <Tabs.Screen

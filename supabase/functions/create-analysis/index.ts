@@ -4,6 +4,41 @@ import { AwsClient } from 'https://esm.sh/aws4fetch@1.0.20';
 const MAX_BYTES = 50 * 1024 * 1024;
 const ACCEPTED = new Set(['video/mp4', 'video/quicktime']);
 
+type SubscriptionTier = 'free' | 'ascendente' | 'lendario' | 'divino';
+
+const TIER_LIMITS: Record<
+  SubscriptionTier,
+  { daily: number; monthly: number; priority: number }
+> = {
+  free: { daily: 1, monthly: 5, priority: 0 },
+  ascendente: { daily: 3, monthly: 20, priority: 10 },
+  lendario: { daily: 6, monthly: 50, priority: 20 },
+  divino: { daily: 20, monthly: 120, priority: 30 },
+};
+
+function effectiveTier(
+  tier: SubscriptionTier | null | undefined,
+  expiresAt: string | null | undefined,
+): SubscriptionTier {
+  if (!tier || tier === 'free') return 'free';
+  if (expiresAt && new Date(expiresAt).getTime() <= Date.now()) return 'free';
+  return tier;
+}
+
+function utcDayStart(): string {
+  const now = new Date();
+  return new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
+  ).toISOString();
+}
+
+function utcMonthStart(): string {
+  const now = new Date();
+  return new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1),
+  ).toISOString();
+}
+
 type Body = {
   source: 'camera' | 'gallery';
   durationMs: number;
@@ -78,6 +113,52 @@ Deno.serve(async (req) => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
   );
 
+  const { data: profile, error: profileError } = await service
+    .from('profiles')
+    .select('subscription_tier, subscription_expires_at')
+    .eq('user_id', user.id)
+    .maybeSingle();
+
+  if (profileError) return json({ error: profileError.message }, 500);
+
+  const tier = effectiveTier(
+    profile?.subscription_tier as SubscriptionTier | undefined,
+    profile?.subscription_expires_at,
+  );
+  const limits = TIER_LIMITS[tier];
+
+  const dayStart = utcDayStart();
+  const monthStart = utcMonthStart();
+
+  const { data: quotaRows, error: quotaError } = await service.rpc(
+    'count_analysis_quota',
+    {
+      p_user_id: user.id,
+      p_day_start: dayStart,
+      p_month_start: monthStart,
+    },
+  );
+
+  if (quotaError) return json({ error: quotaError.message }, 500);
+
+  const quota = Array.isArray(quotaRows) ? quotaRows[0] : quotaRows;
+  const dailyUsed = Number(quota?.daily_count ?? 0);
+  const monthlyUsed = Number(quota?.monthly_count ?? 0);
+
+  if (dailyUsed >= limits.daily || monthlyUsed >= limits.monthly) {
+    return json(
+      {
+        error: 'quota_exceeded',
+        tier,
+        dailyUsed,
+        monthlyUsed,
+        dailyLimit: limits.daily,
+        monthlyLimit: limits.monthly,
+      },
+      403,
+    );
+  }
+
   const ext = extensionFor(body.contentType, body.fileName ?? 'capture.mp4');
   const analysisId = crypto.randomUUID();
   const storageKey = `videos/${user.id}/${analysisId}.${ext}`;
@@ -98,6 +179,7 @@ Deno.serve(async (req) => {
       file_size_bytes: body.fileSizeBytes,
       visibility,
       challenge_id: body.challengeId ?? null,
+      priority: limits.priority,
     })
     .select('*')
     .single();

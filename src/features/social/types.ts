@@ -1,10 +1,17 @@
 export type VideoVisibility = 'private' | 'public';
 
+export type SubscriptionTier =
+  | 'free'
+  | 'ascendente'
+  | 'lendario'
+  | 'divino';
+
 export type Profile = {
   user_id: string;
   display_name: string;
   username: string;
   avatar_url: string | null;
+  banner_url: string | null;
   bio: string;
   level: number;
   xp: number;
@@ -15,6 +22,9 @@ export type Profile = {
   last_measure_date: string | null;
   default_visibility: VideoVisibility;
   is_public_profile: boolean;
+  subscription_tier: SubscriptionTier;
+  subscription_expires_at: string | null;
+  revenuecat_app_user_id: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -60,6 +70,24 @@ export type FeedPost = {
   display_name: string;
   avatar_url: string | null;
   level: number;
+  video_url: string | null;
+  like_count: number;
+  comment_count: number;
+  liked_by_me: boolean;
+};
+
+export type PostComment = {
+  id: string;
+  analysis_id: string;
+  user_id: string;
+  body: string;
+  parent_id: string | null;
+  like_count: number;
+  created_at: string;
+  username: string;
+  display_name: string;
+  avatar_url: string | null;
+  liked_by_me: boolean;
 };
 
 /** XP → level: level = floor(sqrt(xp / 100)) + 1 */

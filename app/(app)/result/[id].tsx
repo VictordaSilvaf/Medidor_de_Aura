@@ -143,7 +143,7 @@ export default function ResultScreen() {
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Fechar"
-        onPress={() => router.replace('/(app)')}
+        onPress={() => router.replace('/(app)/(tabs)')}
         hitSlop={10}
         style={[styles.close, { top: insets.top + 12 }]}
       >

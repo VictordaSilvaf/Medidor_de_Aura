@@ -87,7 +87,7 @@ export default function ProcessingScreen() {
         <GradientButton
           title="Voltar ao início"
           variant="ghost"
-          onPress={() => router.replace('/(app)')}
+          onPress={() => router.replace('/(app)/(tabs)')}
           style={{ marginHorizontal: 24, marginTop: 20 }}
         />
       )}

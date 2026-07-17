@@ -18,6 +18,7 @@ import {
   fetchFollowing,
   type FollowListItem,
 } from '@/src/features/social/followApi';
+import { UserAvatar } from '@/src/shared/ui/UserAvatar';
 import { fonts, palette } from '@/src/shared/ui/theme';
 
 type TabKey = 'followers' | 'following';
@@ -106,11 +107,11 @@ export default function ConnectionsScreen() {
               style={styles.row}
               onPress={() => router.push(`/(app)/user/${item.username}`)}
             >
-              <View style={styles.avatar}>
-                <Text style={styles.avatarLetter}>
-                  {item.display_name.slice(0, 1).toUpperCase()}
-                </Text>
-              </View>
+              <UserAvatar
+                uri={item.avatar_url}
+                name={item.display_name}
+                size={48}
+              />
               <View style={{ flex: 1 }}>
                 <Text style={styles.name}>{item.display_name}</Text>
                 <Text style={styles.username}>

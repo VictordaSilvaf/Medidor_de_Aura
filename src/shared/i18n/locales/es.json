@@ -7,13 +7,19 @@
     "loading": "Cargando…",
     "error": "Error",
     "retry": "Reintentar",
-    "signOut": "Salir"
+    "signOut": "Salir",
+    "delete": "Eliminar",
+    "reply": "Responder",
+    "replyingTo": "Respondiendo a @{{username}}",
+    "cancelReply": "Cancelar respuesta",
+    "share": "Compartir"
   },
   "tabs": {
     "hub": "Hub",
     "feed": "Feed",
     "measure": "Medir",
     "challenges": "Challenges",
+    "search": "Buscar",
     "profile": "Perfil"
   },
   "hub": {
@@ -77,7 +83,103 @@
     "emptyFollowers": "Aún no hay seguidores.",
     "emptyFollowing": "Aún no sigue a nadie.",
     "noPosts": "Aún no hay posts públicos.",
-    "notFound": "Perfil no encontrado."
+    "notFound": "Perfil no encontrado.",
+    "changeAvatar": "Cambiar foto",
+    "changeBanner": "Cambiar banner",
+    "uploadingImage": "Subiendo imagen…",
+    "defaultVisibility": "Visibilidad de nuevas mediciones",
+    "imagePermission": "Permite acceso a las fotos para elegir una imagen.",
+    "imageUploadFailed": "No se pudo subir la imagen."
+  },
+  "menu": {
+    "open": "Abrir menú",
+    "close": "Cerrar menú",
+    "profile": "Mi perfil",
+    "search": "Buscar personas",
+    "feed": "Feed",
+    "challenges": "Desafíos",
+    "uploads": "Mis uploads",
+    "settings": "Ajustes",
+    "notifications": "Actividad",
+    "premium": "VIP Premium"
+  },
+  "premium": {
+    "title": "VIP Premium",
+    "heroTitle": "Farmea más aura",
+    "heroBody": "Las suscripciones VIP desbloquean más análisis de video y prioridad en la cola.",
+    "yourPlan": "Plan actual: {{tier}}",
+    "current": "Activo",
+    "currentPlan": "Plan actual",
+    "subscribe": "Suscribirse",
+    "upgrade": "Mejorar plan",
+    "restore": "Restaurar compras",
+    "successTitle": "Bienvenido al VIP",
+    "successBody": "Tu suscripción está activa. Disfruta más mediciones y cola prioritaria.",
+    "restoreTitle": "Compras restauradas",
+    "restoreSuccess": "Plan activo: {{tier}}",
+    "restoreEmpty": "No se encontró ninguna suscripción activa.",
+    "notConfiguredTitle": "Tienda no disponible",
+    "notConfiguredBody": "Configura las claves de RevenueCat y los productos en las tiendas.",
+    "webNote": "Las suscripciones VIP solo están disponibles en las apps iOS y Android.",
+    "legal": "La suscripción se renueva automáticamente. Cancela cuando quieras en la tienda.",
+    "ctaHub": "Desbloquea más mediciones",
+    "badge": "VIP {{tier}}",
+    "tiers": {
+      "free": "Aprendiz",
+      "ascendente": "Ascendente",
+      "lendario": "Legendario",
+      "divino": "Divino"
+    },
+    "taglines": {
+      "ascendente": "Empieza a farmear de verdad",
+      "lendario": "Aura por encima del promedio",
+      "divino": "Aura casi perfecta"
+    },
+    "dailyQuota": "{{count}} análisis por día",
+    "monthlyQuota": "{{count}} análisis por mes",
+    "priority": "Prioridad en cola: {{level}}"
+  },
+  "quota": {
+    "title": "Cuota agotada",
+    "body": "Usaste {{daily}} hoy y {{monthly}} este mes. Mejora tu plan para medir más."
+  },
+  "search": {
+    "title": "Buscar personas",
+    "placeholder": "Nombre o @username",
+    "hint": "Encuentra personas para seguir y ver sus publicaciones.",
+    "empty": "No se encontraron perfiles."
+  },
+  "engagement": {
+    "comments": "Comentarios",
+    "noComments": "Aún no hay comentarios. Inicia la conversación.",
+    "commentPlaceholder": "Añade un comentario…",
+    "deleteComment": "Eliminar comentario",
+    "deleteCommentConfirm": "Este comentario será eliminado.",
+    "delete": "Eliminar",
+    "justNow": "ahora",
+    "minutesAgo_one": "hace {{count}} min",
+    "minutesAgo_other": "hace {{count}} min",
+    "hoursAgo_one": "hace {{count}} h",
+    "hoursAgo_other": "hace {{count}} h",
+    "daysAgo_one": "hace {{count}} día",
+    "daysAgo_other": "hace {{count}} días",
+    "following": "Siguiendo",
+    "forYou": "Para ti"
+  },
+  "notifications": {
+    "title": "Actividad",
+    "empty": "No hay actividad nueva.",
+    "follow": "comenzó a seguirte",
+    "post_like": "marcó que le gusta tu publicación",
+    "comment": "comentó en tu publicación",
+    "comment_like": "marcó que le gusta tu comentario"
+  },
+  "safety": {
+    "block": "Bloquear usuario",
+    "blockConfirm": "Dejarás de ver el contenido de esta persona.",
+    "report": "Denunciar",
+    "reportSent": "Denuncia enviada.",
+    "reason": "Contenido inapropiado"
   },
   "preview": {
     "title": "Preview",

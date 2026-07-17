@@ -8,6 +8,7 @@ import type { AppDispatch } from '@/src/core/store';
 import { bootstrapProfile } from '@/src/features/social/profileApi';
 import { setMyProfile } from '@/src/features/social/profileSlice';
 import { registerPushTokenForUser } from '@/src/features/video-analysis/pushNotifications';
+import { bootstrapMonetization } from '@/src/features/monetization/monetizationBootstrap';
 
 export async function bootstrapAuth(dispatch: AppDispatch) {
   dispatch(setAuthLoading());
@@ -21,6 +22,7 @@ export async function bootstrapAuth(dispatch: AppDispatch) {
     if (data.session?.user.id) {
       void registerPushTokenForUser(data.session.user.id);
       void bootstrapProfile(dispatch, data.session.user.id);
+      void bootstrapMonetization(dispatch, data.session.user.id);
     } else {
       dispatch(setMyProfile(null));
     }
@@ -33,8 +35,10 @@ export async function bootstrapAuth(dispatch: AppDispatch) {
     if (session?.user.id) {
       void registerPushTokenForUser(session.user.id);
       void bootstrapProfile(dispatch, session.user.id);
+      void bootstrapMonetization(dispatch, session.user.id);
     } else {
       dispatch(setMyProfile(null));
+      void bootstrapMonetization(dispatch, undefined);
     }
   });
 

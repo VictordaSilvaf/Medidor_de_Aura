@@ -9,17 +9,36 @@ import type {
   VideoAnalysisResult,
   VideoSource,
 } from './types';
+import { QuotaExceededError } from '@/src/features/monetization/quotaErrors';
+import type { SubscriptionTier } from '@/src/features/monetization/subscriptionTiers';
+
+function parseInvokeError(data: unknown): never {
+  if (data && typeof data === 'object' && 'error' in data) {
+    const payload = data as Record<string, unknown>;
+    if (payload.error === 'quota_exceeded') {
+      throw new QuotaExceededError(
+        (payload.tier as SubscriptionTier) ?? 'free',
+        Number(payload.dailyUsed ?? 0),
+        Number(payload.monthlyUsed ?? 0),
+        Number(payload.dailyLimit ?? 0),
+        Number(payload.monthlyLimit ?? 0),
+      );
+    }
+    throw new Error(String(payload.error));
+  }
+  throw new Error('Request failed');
+}
 
 async function invokeFunction<T>(
   name: string,
   body: Record<string, unknown>,
 ): Promise<T> {
   const { data, error } = await supabase.functions.invoke(name, { body });
+  if (data && typeof data === 'object' && 'error' in data && data.error) {
+    parseInvokeError(data);
+  }
   if (error) {
     throw new Error(error.message || `Falha ao chamar ${name}`);
-  }
-  if (data && typeof data === 'object' && 'error' in data && data.error) {
-    throw new Error(String(data.error));
   }
   return data as T;
 }
@@ -77,6 +96,17 @@ export async function confirmUpload(analysisId: string): Promise<VideoAnalysis> 
     { analysisId },
   );
   return data.analysis;
+}
+
+export async function fetchVideoPlaybackUrls(
+  analysisIds: string[],
+): Promise<Record<string, string>> {
+  if (!analysisIds.length) return {};
+  const data = await invokeFunction<{ urls: Record<string, string> }>(
+    'get-video-urls',
+    { analysisIds },
+  );
+  return data.urls ?? {};
 }
 
 export async function fetchAnalysis(id: string): Promise<VideoAnalysis> {

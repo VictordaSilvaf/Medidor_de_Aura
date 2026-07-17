@@ -158,11 +158,12 @@ export default function RevealScreen() {
     transform: [{ scale: ring.value }],
     opacity: 1.1 - (ring.value - 0.6),
   }));
+  const targetScoreColor = scoreColor(result?.score ?? 0);
   const scoreAnimStyle = useAnimatedStyle(() => {
     const color = interpolateColor(
       scoreProgress.value,
       [0, 0.25, 0.5, 0.75, 1],
-      ['#94A3B8', '#38BDF8', '#10B981', '#FACC15', scoreColor(result?.score ?? 0)],
+      ['#94A3B8', '#38BDF8', '#10B981', '#FACC15', targetScoreColor],
     );
     return {
       color,

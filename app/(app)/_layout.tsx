@@ -39,6 +39,8 @@ export default function AppLayout() {
       <Stack.Screen name="uploads" options={{ animation: 'slide_from_right' }} />
       <Stack.Screen name="user/[username]" options={{ animation: 'slide_from_right' }} />
       <Stack.Screen name="connections/[userId]" options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="premium" options={{ animation: 'slide_from_right' }} />
+      <Stack.Screen name="notifications" options={{ animation: 'slide_from_right' }} />
       <Stack.Screen name="settings" options={{ animation: 'slide_from_right' }} />
       <Stack.Screen name="profile/setup" options={{ animation: 'fade', gestureEnabled: false }} />
       <Stack.Screen name="profile/edit" options={{ animation: 'slide_from_right' }} />

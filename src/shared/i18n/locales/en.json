@@ -7,13 +7,19 @@
     "loading": "Loading…",
     "error": "Error",
     "retry": "Try again",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "delete": "Delete",
+    "reply": "Reply",
+    "replyingTo": "Replying to @{{username}}",
+    "cancelReply": "Cancel reply",
+    "share": "Share"
   },
   "tabs": {
     "hub": "Hub",
     "feed": "Feed",
     "measure": "Measure",
     "challenges": "Challenges",
+    "search": "Search",
     "profile": "Profile"
   },
   "hub": {
@@ -77,7 +83,103 @@
     "emptyFollowers": "No followers yet.",
     "emptyFollowing": "Not following anyone yet.",
     "noPosts": "No public posts yet.",
-    "notFound": "Profile not found."
+    "notFound": "Profile not found.",
+    "changeAvatar": "Change photo",
+    "changeBanner": "Change banner",
+    "uploadingImage": "Uploading image…",
+    "defaultVisibility": "New measurement visibility",
+    "imagePermission": "Allow photo access to choose an image.",
+    "imageUploadFailed": "The image could not be uploaded."
+  },
+  "menu": {
+    "open": "Open menu",
+    "close": "Close menu",
+    "profile": "My profile",
+    "search": "Find people",
+    "feed": "Feed",
+    "challenges": "Challenges",
+    "uploads": "My uploads",
+    "settings": "Settings",
+    "notifications": "Activity",
+    "premium": "VIP Premium"
+  },
+  "premium": {
+    "title": "VIP Premium",
+    "heroTitle": "Farm more aura",
+    "heroBody": "VIP subscriptions unlock more video analyses and priority processing.",
+    "yourPlan": "Current plan: {{tier}}",
+    "current": "Active",
+    "currentPlan": "Current plan",
+    "subscribe": "Subscribe",
+    "upgrade": "Upgrade",
+    "restore": "Restore purchases",
+    "successTitle": "Welcome to VIP",
+    "successBody": "Your subscription is active. Enjoy more scans and priority queue.",
+    "restoreTitle": "Purchases restored",
+    "restoreSuccess": "Active plan: {{tier}}",
+    "restoreEmpty": "No active subscription found.",
+    "notConfiguredTitle": "Store unavailable",
+    "notConfiguredBody": "Configure RevenueCat keys and store products to purchase in the app.",
+    "webNote": "VIP subscriptions are only available on the iOS and Android apps.",
+    "legal": "Subscription renews automatically. Cancel anytime in store settings.",
+    "ctaHub": "Unlock more scans",
+    "badge": "VIP {{tier}}",
+    "tiers": {
+      "free": "Apprentice",
+      "ascendente": "Ascendant",
+      "lendario": "Legendary",
+      "divino": "Divine"
+    },
+    "taglines": {
+      "ascendente": "Start farming for real",
+      "lendario": "Aura above average",
+      "divino": "Near-perfect aura"
+    },
+    "dailyQuota": "{{count}} scans per day",
+    "monthlyQuota": "{{count}} scans per month",
+    "priority": "Queue priority: {{level}}"
+  },
+  "quota": {
+    "title": "Quota reached",
+    "body": "You used {{daily}} today and {{monthly}} this month. Upgrade to scan more."
+  },
+  "search": {
+    "title": "Find people",
+    "placeholder": "Name or @username",
+    "hint": "Find people to follow and see their posts.",
+    "empty": "No profiles found."
+  },
+  "engagement": {
+    "comments": "Comments",
+    "noComments": "No comments yet. Start the conversation.",
+    "commentPlaceholder": "Add a comment…",
+    "deleteComment": "Delete comment",
+    "deleteCommentConfirm": "This comment will be removed.",
+    "delete": "Delete",
+    "justNow": "now",
+    "minutesAgo_one": "{{count}} min ago",
+    "minutesAgo_other": "{{count}} min ago",
+    "hoursAgo_one": "{{count}} hour ago",
+    "hoursAgo_other": "{{count}} hours ago",
+    "daysAgo_one": "{{count}} day ago",
+    "daysAgo_other": "{{count}} days ago",
+    "following": "Following",
+    "forYou": "For you"
+  },
+  "notifications": {
+    "title": "Activity",
+    "empty": "No new activity.",
+    "follow": "started following you",
+    "post_like": "liked your post",
+    "comment": "commented on your post",
+    "comment_like": "liked your comment"
+  },
+  "safety": {
+    "block": "Block user",
+    "blockConfirm": "You will stop seeing this person's content.",
+    "report": "Report",
+    "reportSent": "Report sent.",
+    "reason": "Inappropriate content"
   },
   "preview": {
     "title": "Preview",

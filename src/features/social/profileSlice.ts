@@ -1,6 +1,10 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 import type { Profile } from './types';
+import {
+  effectiveSubscriptionTier,
+  type SubscriptionTier,
+} from '@/src/features/monetization/subscriptionTiers';
 
 type ProfileState = {
   me: Profile | null;
@@ -43,3 +47,17 @@ export const selectProfileLoading = (state: { profile: ProfileState }) =>
   state.profile.loading;
 export const selectSetupRequired = (state: { profile: ProfileState }) =>
   state.profile.setupRequired;
+
+export const selectSubscriptionTier = (state: {
+  profile: ProfileState;
+}): SubscriptionTier => {
+  const profile = state.profile.me;
+  if (!profile) return 'free';
+  return effectiveSubscriptionTier(
+    profile.subscription_tier ?? 'free',
+    profile.subscription_expires_at,
+  );
+};
+
+export const selectIsPremium = (state: { profile: ProfileState }) =>
+  selectSubscriptionTier(state) !== 'free';

@@ -1,15 +1,54 @@
 import { supabase } from '@/src/features/auth/supabase';
+import { fetchVideoPlaybackUrls } from '@/src/features/video-analysis/analysisApi';
 
+import { fetchMyLikedPostIds } from './engagementApi';
+import { fetchBlockedUserIds } from './notificationsApi';
 import type { Challenge, FeedPost } from './types';
 
-export async function fetchPublicFeed(limit = 40): Promise<FeedPost[]> {
-  const { data: analyses, error } = await supabase
+export async function fetchPublicFeed(
+  limit = 40,
+  viewerId?: string | null,
+  offset = 0,
+  mode: 'all' | 'following' = 'all',
+): Promise<FeedPost[]> {
+  let followingIds: string[] | null = null;
+  if (mode === 'following' && viewerId) {
+    const { data: follows, error: followsError } = await supabase
+      .from('follows')
+      .select('following_id')
+      .eq('follower_id', viewerId);
+    if (followsError) throw new Error(followsError.message);
+    followingIds = (follows ?? []).map((row) => row.following_id as string);
+    if (!followingIds.length) return [];
+  }
+  const blockedIds = viewerId
+    ? await fetchBlockedUserIds(viewerId)
+    : new Set<string>();
+
+  let feedQuery = supabase
     .from('video_analyses')
-    .select('id, user_id, posted_at, created_at, visibility')
+    .select(
+      'id, user_id, posted_at, created_at, visibility, like_count, comment_count',
+    )
     .eq('visibility', 'public')
     .eq('status', 'completed')
-    .order('posted_at', { ascending: false })
-    .limit(limit);
+    .order('posted_at', { ascending: false });
+
+  if (followingIds) {
+    feedQuery = feedQuery.in('user_id', followingIds);
+  }
+  if (blockedIds.size) {
+    feedQuery = feedQuery.not(
+      'user_id',
+      'in',
+      `(${[...blockedIds].join(',')})`,
+    );
+  }
+
+  const { data: analyses, error } = await feedQuery.range(
+    offset,
+    offset + limit - 1,
+  );
 
   if (error) throw new Error(error.message);
   if (!analyses?.length) return [];
@@ -17,7 +56,8 @@ export async function fetchPublicFeed(limit = 40): Promise<FeedPost[]> {
   const ids = analyses.map((a) => a.id);
   const userIds = [...new Set(analyses.map((a) => a.user_id))];
 
-  const [{ data: results }, { data: profiles }] = await Promise.all([
+  const [{ data: results }, { data: profiles }, likedIds, playbackUrls] =
+    await Promise.all([
     supabase
       .from('video_analysis_results')
       .select('analysis_id, score, tier_id')
@@ -26,6 +66,10 @@ export async function fetchPublicFeed(limit = 40): Promise<FeedPost[]> {
       .from('profiles')
       .select('user_id, username, display_name, avatar_url, level')
       .in('user_id', userIds),
+    viewerId
+      ? fetchMyLikedPostIds(ids, viewerId)
+      : Promise.resolve(new Set<string>()),
+    fetchVideoPlaybackUrls(ids),
   ]);
 
   const resultById = new Map(
@@ -52,6 +96,10 @@ export async function fetchPublicFeed(limit = 40): Promise<FeedPost[]> {
         display_name: profile.display_name,
         avatar_url: profile.avatar_url,
         level: profile.level,
+        video_url: playbackUrls[row.id] ?? null,
+        like_count: row.like_count ?? 0,
+        comment_count: row.comment_count ?? 0,
+        liked_by_me: likedIds.has(row.id),
       } satisfies FeedPost;
     })
     .filter(Boolean) as FeedPost[];
@@ -164,7 +212,10 @@ export async function createDuelChallenge(input: {
   return data as Challenge;
 }
 
-export async function fetchPublicPost(analysisId: string) {
+export async function fetchPublicPost(
+  analysisId: string,
+  viewerId?: string | null,
+) {
   const { data: analysis, error } = await supabase
     .from('video_analyses')
     .select('*')
@@ -173,7 +224,8 @@ export async function fetchPublicPost(analysisId: string) {
   if (error) throw new Error(error.message);
   if (!analysis) return null;
 
-  const [{ data: result }, { data: profile }] = await Promise.all([
+  const [{ data: result }, { data: profile }, likedIds, playbackUrls] =
+    await Promise.all([
     supabase
       .from('video_analysis_results')
       .select('*')
@@ -184,7 +236,17 @@ export async function fetchPublicPost(analysisId: string) {
       .select('*')
       .eq('user_id', analysis.user_id)
       .maybeSingle(),
+    viewerId
+      ? fetchMyLikedPostIds([analysisId], viewerId)
+      : Promise.resolve(new Set<string>()),
+    fetchVideoPlaybackUrls([analysisId]),
   ]);
 
-  return { analysis, result, profile };
+  return {
+    analysis,
+    result,
+    profile,
+    liked_by_me: likedIds.has(analysisId),
+    video_url: playbackUrls[analysisId] ?? null,
+  };
 }

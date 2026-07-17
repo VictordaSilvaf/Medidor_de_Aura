@@ -10,6 +10,7 @@ import {
   persistReducer,
   persistStore,
 } from 'redux-persist';
+import autoMergeLevel2 from 'redux-persist/lib/stateReconciler/autoMergeLevel2';
 
 import { auraReducer } from '@/src/features/aura/auraSlice';
 import { authReducer } from '@/src/features/auth/authSlice';
@@ -31,6 +32,8 @@ const persistConfig = {
   storage: reduxStorage,
   // Session is revalidated via Supabase on boot — persist client prefs + farm de aura.
   whitelist: ['prefs', 'aura'] as string[],
+  // Merge new slice fields (e.g. seenRevealIds) into older persisted state.
+  stateReconciler: autoMergeLevel2,
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
