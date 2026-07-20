@@ -241,4 +241,4 @@ setInterval(() => {
   void tick().catch((err) => console.error('[worker] tick error', err));
 }, pollMs);
 
-void tick();
+void tick().catch((err) => console.error('[worker] tick error', err));

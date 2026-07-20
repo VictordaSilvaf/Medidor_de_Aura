@@ -81,10 +81,10 @@
     "typescript": "~6.0.3"
   },
   "scripts": {
-    "start": "WITH_ROZENITE=true NODE_ENV=development expo start",
-    "android": "WITH_ROZENITE=true NODE_ENV=development expo run:android",
-    "ios": "WITH_ROZENITE=true NODE_ENV=development expo run:ios",
-    "web": "WITH_ROZENITE=true NODE_ENV=development expo start --web",
+    "start": "WITH_ROZENITE=true NODE_ENV=development node --env-file=.env ./node_modules/expo/bin/cli start",
+    "android": "WITH_ROZENITE=true NODE_ENV=development node --env-file=.env ./node_modules/expo/bin/cli run:android",
+    "ios": "WITH_ROZENITE=true NODE_ENV=development node --env-file=.env ./node_modules/expo/bin/cli run:ios",
+    "web": "WITH_ROZENITE=true NODE_ENV=development node --env-file=.env ./node_modules/expo/bin/cli start --web",
     "lint": "expo lint",
     "postinstall": "patch-package"
   },

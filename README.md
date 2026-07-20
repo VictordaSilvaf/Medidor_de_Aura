@@ -191,8 +191,11 @@ Worker local:
 ```bash
 cd worker
 cp .env.example .env   # SUPABASE_URL + SERVICE_ROLE_KEY
-yarn install && yarn start
+npm install && npm run dev
+# produção local: node --env-file=.env src/index.js
 ```
+
+Deploy (Railway): Root Directory = `worker`, variables no dashboard — detalhes em `worker/README.md`.
 
 ---
 
