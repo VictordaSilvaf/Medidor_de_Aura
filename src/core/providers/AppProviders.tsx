@@ -18,6 +18,7 @@ import {
 import { queryClient } from '@/src/shared/api/queryClient';
 import { useRozeniteAppDevTools } from '@/src/shared/devtools/useRozeniteDevTools';
 import i18n, { detectDeviceLocale } from '@/src/shared/i18n';
+import { AppAlertHost } from '@/src/shared/ui/AppAlertHost';
 
 function AuthBootstrap({ children }: { children: ReactNode }) {
   const dispatch = useAppDispatch();
@@ -78,7 +79,10 @@ export function AppProviders({ children }: { children: ReactNode }) {
         <PersistGate loading={<PersistLoading />} persistor={persistor}>
           <QueryClientProvider client={queryClient}>
             <I18nextProvider i18n={i18n}>
-              <ThemedShell>{children}</ThemedShell>
+              <ThemedShell>
+                {children}
+                <AppAlertHost />
+              </ThemedShell>
             </I18nextProvider>
           </QueryClientProvider>
         </PersistGate>

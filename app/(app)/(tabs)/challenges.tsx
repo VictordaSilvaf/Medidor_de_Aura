@@ -27,21 +27,25 @@ function ChallengeCard({
   onPress: () => void;
 }) {
   const { t, i18n } = useTranslation();
+  const isActive = item.status === 'active';
+
   return (
-    <Pressable onPress={onPress} style={styles.card}>
-      <Text style={styles.type}>{t(`challenges.type_${item.type}`)}</Text>
+    <Pressable
+      onPress={onPress}
+      style={[styles.card, isActive ? styles.cardActive : styles.cardInactive]}
+    >
+      <Text style={[styles.type, isActive && styles.typeActive]}>
+        {t(`challenges.type_${item.type}`)}
+      </Text>
       <Text style={styles.title}>
         {localizeChallengeText(item.title, i18n.language)}
       </Text>
       <Text style={styles.desc} numberOfLines={2}>
         {localizeChallengeText(item.description, i18n.language)}
       </Text>
-      <View style={styles.row}>
-        <Text style={styles.reward}>
-          {t('challenges.reward', { xp: item.reward_xp })}
-        </Text>
-        <Text style={styles.status}>{item.status}</Text>
-      </View>
+      <Text style={styles.reward}>
+        {t('challenges.reward', { xp: item.reward_xp })}
+      </Text>
     </Pressable>
   );
 }
@@ -56,7 +60,7 @@ export default function ChallengesScreen() {
     queryFn: fetchChallenges,
   });
 
-  const active = data.filter((c) => c.status === 'active');
+  const challenges = data.filter((c) => c.status !== 'draft');
 
   return (
     <View style={[styles.root, { paddingTop: insets.top + 16 }]}>
@@ -69,7 +73,7 @@ export default function ChallengesScreen() {
         <ActivityIndicator color={palette.primary} style={{ marginTop: 40 }} />
       ) : (
         <FlatList
-          data={active}
+          data={challenges}
           keyExtractor={(item) => item.id}
           refreshing={isRefetching}
           onRefresh={() => void refetch()}
@@ -117,17 +121,26 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: 18,
     borderWidth: 1,
-    borderColor: palette.borderSubtle,
-    backgroundColor: palette.card,
     padding: 16,
     gap: 6,
   },
+  cardActive: {
+    borderColor: 'rgba(109,93,252,0.45)',
+    backgroundColor: 'rgba(109,93,252,0.18)',
+  },
+  cardInactive: {
+    borderColor: palette.borderSubtle,
+    backgroundColor: palette.card,
+  },
   type: {
-    color: palette.neon,
+    color: palette.textDisabled,
     fontFamily: fonts.medium,
     fontSize: 11,
     letterSpacing: 1.2,
     textTransform: 'uppercase',
+  },
+  typeActive: {
+    color: palette.neon,
   },
   title: {
     color: palette.textPrimary,
@@ -140,20 +153,10 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 18,
   },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 8,
-  },
   reward: {
     color: palette.primary,
     fontFamily: fonts.semibold,
     fontSize: 13,
-  },
-  status: {
-    color: palette.textDisabled,
-    fontFamily: fonts.medium,
-    fontSize: 12,
-    textTransform: 'uppercase',
+    marginTop: 8,
   },
 });

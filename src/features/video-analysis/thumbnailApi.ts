@@ -32,14 +32,24 @@ export async function generateFrameCandidates(
   durationMs: number,
 ): Promise<FrameCandidate[]> {
   const times = frameTimesSeconds(durationMs);
-  const thumbs = await player.generateThumbnailsAsync(times, {
-    maxWidth: THUMB_WIDTH.lg,
-  });
-
-  return thumbs.map((thumb, index) => ({
-    id: `frame-${index}`,
-    preview: thumb,
-  }));
+  try {
+    const thumbs = await player.generateThumbnailsAsync(times, {
+      maxWidth: THUMB_WIDTH.lg,
+    });
+    return thumbs.map((thumb, index) => ({
+      id: `frame-${index}`,
+      preview: thumb,
+    }));
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (
+      message.includes('does not exist') ||
+      message.includes('IllegalArgumentException')
+    ) {
+      throw new Error('VIDEO_FILE_MISSING');
+    }
+    throw error;
+  }
 }
 
 export async function pickGalleryThumbnail(): Promise<{

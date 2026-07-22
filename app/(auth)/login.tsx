@@ -2,7 +2,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Link } from 'expo-router';
 import { Controller, useForm } from 'react-hook-form';
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -28,6 +27,7 @@ import {
   type LoginFormValues,
 } from '@/src/features/auth/schemas';
 import { AuraOrb } from '@/src/shared/ui/AuraOrb';
+import { appAlert } from '@/src/shared/ui/appAlert';
 import { GradientButton } from '@/src/shared/ui/GradientButton';
 import { brandGradient, palette } from '@/src/shared/ui/theme';
 
@@ -49,7 +49,7 @@ export default function LoginScreen() {
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'Não foi possível entrar';
-      Alert.alert('Erro ao entrar', message);
+      appAlert.error('Erro ao entrar', message);
     } finally {
       setSubmitting(false);
     }

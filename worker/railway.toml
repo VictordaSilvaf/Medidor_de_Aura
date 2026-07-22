@@ -9,3 +9,6 @@ dockerfilePath = "Dockerfile"
 startCommand = "node src/index.js"
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
+
+# If the UI builder is Nixpacks/Railpack instead of Docker, pin Node 22
+# (supabase-js needs native WebSocket — Node 20 crashes on createClient).

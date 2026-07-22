@@ -5,6 +5,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
+import WebSocket from 'ws';
 
 import { processAnalysisStub } from './process.js';
 import { sendExpoPush } from './push.js';
@@ -20,6 +21,9 @@ if (!supabaseUrl || !serviceKey) {
 
 const supabase = createClient(supabaseUrl, serviceKey, {
   auth: { persistSession: false, autoRefreshToken: false },
+  // supabase-js initializes Realtime even for REST-only usage; Node <22
+  // has no global WebSocket — provide `ws` so createClient does not crash.
+  realtime: { transport: WebSocket },
 });
 
 const TIER_ORDER = ['comum', 'rara', 'epica', 'lendaria', 'divina', 'cosmica'];

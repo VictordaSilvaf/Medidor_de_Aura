@@ -21,6 +21,7 @@ node --env-file=.env src/index.js
 1. Crie um projeto em [railway.app](https://railway.app) → **New Project** → **Deploy from GitHub** (repo Medidor_de_Aura).
 2. No serviço, defina **Root Directory** = `worker`.
 3. Railway detecta o `Dockerfile` / `railway.toml` automaticamente.
+   - Preferir **Builder = Dockerfile** (`node:22-alpine`). Se usar Nixpacks, `engines` / `.nvmrc` pedem Node 22.
 4. Em **Variables**, adicione:
 
 | Var | Obrigatório | Uso |

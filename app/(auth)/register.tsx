@@ -2,7 +2,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Link } from 'expo-router';
 import { Controller, useForm } from 'react-hook-form';
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -26,6 +25,7 @@ import {
   registerSchema,
   type RegisterFormValues,
 } from '@/src/features/auth/schemas';
+import { appAlert } from '@/src/shared/ui/appAlert';
 import { GradientButton } from '@/src/shared/ui/GradientButton';
 
 export default function RegisterScreen() {
@@ -43,14 +43,14 @@ export default function RegisterScreen() {
     try {
       setSubmitting(true);
       await signUpWithEmail(values.email.trim(), values.password);
-      Alert.alert(
+      appAlert.success(
         'Conta criada',
         'Verifique seu e-mail se a confirmação estiver habilitada no Supabase.',
       );
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'Não foi possível cadastrar';
-      Alert.alert('Erro ao cadastrar', message);
+      appAlert.error('Erro ao cadastrar', message);
     } finally {
       setSubmitting(false);
     }

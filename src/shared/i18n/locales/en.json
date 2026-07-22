@@ -6,6 +6,9 @@
     "back": "Back",
     "loading": "Loading…",
     "error": "Error",
+    "ok": "OK",
+    "success": "Success",
+    "warning": "Warning",
     "retry": "Try again",
     "signOut": "Sign out",
     "delete": "Delete",
@@ -205,7 +208,9 @@
     "titleLabel": "Title (optional)",
     "titlePlaceholder": "Name this measurement",
     "cover": "Cover",
-    "pickCover": "Gallery"
+    "pickCover": "Gallery",
+    "framesFailed": "Could not extract frames from the video. Pick a cover from the gallery.",
+    "framesMissing": "The video file left the cache. Record or pick again, or choose a cover from the gallery."
   },
   "feed": {
     "title": "Aura feed",

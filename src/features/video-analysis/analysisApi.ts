@@ -1,4 +1,5 @@
 import { File, UploadType } from 'expo-file-system';
+import { FunctionsHttpError } from '@supabase/supabase-js';
 
 import { supabase } from '@/src/features/auth/supabase';
 import type { VideoVisibility } from '@/src/features/social/types';
@@ -29,6 +30,26 @@ function parseInvokeError(data: unknown): never {
   throw new Error('Request failed');
 }
 
+async function readFunctionsErrorBody(error: unknown): Promise<unknown> {
+  if (!(error instanceof FunctionsHttpError)) return null;
+  const context = error.context as Response | undefined;
+  if (!context) return null;
+  try {
+    const response =
+      typeof context.clone === 'function' ? context.clone() : context;
+    return await response.json();
+  } catch {
+    try {
+      const response =
+        typeof context.clone === 'function' ? context.clone() : context;
+      const text = await response.text();
+      return text ? { error: text } : null;
+    } catch {
+      return null;
+    }
+  }
+}
+
 async function invokeFunction<T>(
   name: string,
   body: Record<string, unknown>,
@@ -38,6 +59,8 @@ async function invokeFunction<T>(
     parseInvokeError(data);
   }
   if (error) {
+    const bodyJson = await readFunctionsErrorBody(error);
+    if (bodyJson) parseInvokeError(bodyJson);
     throw new Error(error.message || `Falha ao chamar ${name}`);
   }
   return data as T;

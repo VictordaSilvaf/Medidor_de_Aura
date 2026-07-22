@@ -10,7 +10,6 @@ import {
 import { useCallback, useEffect, useRef, useState, type ComponentRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  Alert,
   Pressable,
   StyleSheet,
   Text,
@@ -37,8 +36,10 @@ import {
   ensureCapturePermissions,
   openSystemSettings,
 } from '@/src/features/video-analysis/permissions';
+import { persistLocalVideo } from '@/src/features/video-analysis/persistLocalVideo';
 import { pickGalleryVideo } from '@/src/features/video-analysis/pickGalleryVideo';
 import { validateVideoMeta } from '@/src/features/video-analysis/validateVideo';
+import { appAlert } from '@/src/shared/ui/appAlert';
 import { CaptureSettingsIsland } from '@/src/shared/ui/CaptureSettingsIsland';
 import { GradientButton } from '@/src/shared/ui/GradientButton';
 import { fonts, palette } from '@/src/shared/ui/theme';
@@ -85,7 +86,7 @@ export default function CaptureScreen() {
       if (cancelled) return;
       setPermissionOk(result.ok);
       if (!result.ok && !result.canAskAgain) {
-        Alert.alert(
+        appAlert.warn(
           'Permissões necessárias',
           'Ative câmera e microfone nas configurações para medir sua aura.',
           [
@@ -102,7 +103,7 @@ export default function CaptureScreen() {
   }, [clearTimers]);
 
   const goToPreview = useCallback(
-    (video: {
+    async (video: {
       uri: string;
       durationMs: number;
       fileSizeBytes: number;
@@ -110,17 +111,26 @@ export default function CaptureScreen() {
       fileName: string;
       source: 'camera' | 'gallery';
     }) => {
-      dispatch(
-        setPendingCapture({
-          uri: video.uri,
-          source: video.source,
-          durationMs: video.durationMs,
-          fileSizeBytes: video.fileSizeBytes,
-          mimeType: video.mimeType,
-          fileName: video.fileName,
-        }),
-      );
-      router.push('/(app)/preview');
+      try {
+        const stableUri = await persistLocalVideo(video.uri, video.fileName);
+        dispatch(
+          setPendingCapture({
+            uri: stableUri,
+            source: video.source,
+            durationMs: video.durationMs,
+            fileSizeBytes: video.fileSizeBytes,
+            mimeType: video.mimeType,
+            fileName: video.fileName,
+          }),
+        );
+        router.push('/(app)/preview');
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : 'Não foi possível preparar o vídeo.';
+        appAlert.error('Vídeo', message);
+      }
     },
     [dispatch, router],
   );
@@ -157,14 +167,14 @@ export default function CaptureScreen() {
         durationMs,
         mimeType: 'video/mp4',
       });
-      goToPreview({ ...validated, source: 'camera' });
+      void goToPreview({ ...validated, source: 'camera' });
     } catch (error) {
       clearTimers();
       setPhase('idle');
       pulse.set(withTiming(1, { duration: 200 }));
       const message =
         error instanceof Error ? error.message : 'Não foi possível gravar o vídeo.';
-      Alert.alert('Gravação', message);
+      appAlert.error('Gravação', message);
     }
   }, [clearTimers, goToPreview, pulse, ready]);
 
@@ -225,18 +235,18 @@ export default function CaptureScreen() {
     try {
       const video = await pickGalleryVideo();
       if (!video) return;
-      goToPreview({ ...video, source: 'gallery' });
+      await goToPreview({ ...video, source: 'gallery' });
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'Falha ao escolher o vídeo.';
       if (message.includes('configurações')) {
-        Alert.alert('Galeria', message, [
+        appAlert.warn('Galeria', message, [
           { text: 'Cancelar', style: 'cancel' },
           { text: 'Abrir ajustes', onPress: () => void openSystemSettings() },
         ]);
         return;
       }
-      Alert.alert('Galeria', message);
+      appAlert.error('Galeria', message);
     }
   }, [goToPreview]);
 

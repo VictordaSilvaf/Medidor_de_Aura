@@ -5,7 +5,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
-  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -33,6 +32,7 @@ import {
   pickGalleryThumbnail,
   type FrameCandidate,
 } from '@/src/features/video-analysis/thumbnailApi';
+import { appAlert } from '@/src/shared/ui/appAlert';
 import { GradientButton } from '@/src/shared/ui/GradientButton';
 import { fonts, palette } from '@/src/shared/ui/theme';
 
@@ -79,7 +79,16 @@ export default function PreviewScreen() {
         setGalleryUri(null);
       } catch (error) {
         console.warn('[preview] frame generation failed', error);
-        if (!cancelled) setFrames([]);
+        if (!cancelled) {
+          setFrames([]);
+          const code = error instanceof Error ? error.message : '';
+          appAlert.warn(
+            t('preview.cover'),
+            code === 'VIDEO_FILE_MISSING'
+              ? t('preview.framesMissing')
+              : t('preview.framesFailed'),
+          );
+        }
       } finally {
         if (!cancelled) setFramesLoading(false);
       }
@@ -88,7 +97,7 @@ export default function PreviewScreen() {
     return () => {
       cancelled = true;
     };
-  }, [capture, player]);
+  }, [capture, player, t]);
 
   const handleDiscard = useCallback(() => {
     dispatch(clearPendingCapture());
@@ -102,7 +111,7 @@ export default function PreviewScreen() {
       setGalleryUri(picked.uri);
       setSelectedId('gallery');
     } catch (error) {
-      Alert.alert(
+      appAlert.error(
         t('common.error'),
         error instanceof Error ? error.message : t('common.error'),
       );
@@ -135,7 +144,7 @@ export default function PreviewScreen() {
     } catch (error) {
       if (isQuotaExceededError(error)) {
         setUploading(false);
-        Alert.alert(
+        appAlert.warn(
           t('quota.title'),
           t('quota.body', {
             daily: error.dailyUsed,
@@ -153,7 +162,7 @@ export default function PreviewScreen() {
       }
       const message =
         error instanceof Error ? error.message : t('common.error');
-      Alert.alert(t('common.error'), message);
+      appAlert.error(t('common.error'), message);
       setUploading(false);
     }
   }, [

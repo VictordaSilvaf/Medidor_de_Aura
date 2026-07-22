@@ -4,7 +4,6 @@ import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
-  Alert,
   Platform,
   Pressable,
   ScrollView,
@@ -35,6 +34,7 @@ import {
 } from '@/src/features/social/profileSlice';
 import { GlowCard } from '@/src/shared/ui/GlowCard';
 import { GradientButton } from '@/src/shared/ui/GradientButton';
+import { appAlert } from '@/src/shared/ui/appAlert';
 import { fonts, palette } from '@/src/shared/ui/theme';
 
 const PAID: Array<Exclude<SubscriptionTier, 'free'>> = [
@@ -129,10 +129,13 @@ export default function PremiumScreen() {
       setLoadingTier(tier);
       try {
         await purchaseSubscriptionTier(dispatch, user.id, tier);
-        Alert.alert(t('premium.successTitle'), t('premium.successBody'));
+        appAlert.success(t('premium.successTitle'), t('premium.successBody'));
       } catch (error) {
         if (error instanceof MonetizationNotConfiguredError) {
-          Alert.alert(t('premium.notConfiguredTitle'), t('premium.notConfiguredBody'));
+          appAlert.warn(
+            t('premium.notConfiguredTitle'),
+            t('premium.notConfiguredBody'),
+          );
         } else if (
           error &&
           typeof error === 'object' &&
@@ -143,7 +146,7 @@ export default function PremiumScreen() {
         } else {
           const message =
             error instanceof Error ? error.message : t('common.error');
-          Alert.alert(t('common.error'), message);
+          appAlert.error(t('common.error'), message);
         }
       } finally {
         setLoadingTier(null);
@@ -157,17 +160,22 @@ export default function PremiumScreen() {
     setRestoring(true);
     try {
       const tier = await restoreSubscriptions(dispatch, user.id);
-      Alert.alert(
-        t('premium.restoreTitle'),
-        tier === 'free'
-          ? t('premium.restoreEmpty')
-          : t('premium.restoreSuccess', { tier: t(tierLabelKey(tier)) }),
-      );
+      if (tier === 'free') {
+        appAlert.warn(t('premium.restoreTitle'), t('premium.restoreEmpty'));
+      } else {
+        appAlert.success(
+          t('premium.restoreTitle'),
+          t('premium.restoreSuccess', { tier: t(tierLabelKey(tier)) }),
+        );
+      }
     } catch (error) {
       if (error instanceof MonetizationNotConfiguredError) {
-        Alert.alert(t('premium.notConfiguredTitle'), t('premium.notConfiguredBody'));
+        appAlert.warn(
+          t('premium.notConfiguredTitle'),
+          t('premium.notConfiguredBody'),
+        );
       } else {
-        Alert.alert(
+        appAlert.error(
           t('common.error'),
           error instanceof Error ? error.message : t('common.error'),
         );

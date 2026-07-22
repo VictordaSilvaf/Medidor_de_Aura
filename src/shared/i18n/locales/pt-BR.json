@@ -6,6 +6,9 @@
     "back": "Voltar",
     "loading": "Carregando…",
     "error": "Erro",
+    "ok": "OK",
+    "success": "Sucesso",
+    "warning": "Atenção",
     "retry": "Tentar de novo",
     "signOut": "Sair",
     "delete": "Excluir",
@@ -190,7 +193,7 @@
   "preview": {
     "title": "Preview",
     "discard": "Descartar",
-    "useThis": "Usar este",
+    "useThis": "Publicar",
     "uploading": "Enviando… {{percent}}%",
     "empty": "Nenhum vídeo para revisar.",
     "backToCapture": "Voltar à captura",
@@ -205,7 +208,9 @@
     "titleLabel": "Título (opcional)",
     "titlePlaceholder": "Dê um nome para esta medição",
     "cover": "Capa",
-    "pickCover": "Galeria"
+    "pickCover": "Galeria",
+    "framesFailed": "Não foi possível gerar frames do vídeo. Escolha uma capa na galeria.",
+    "framesMissing": "O arquivo do vídeo sumiu do cache. Grave ou escolha de novo, ou use uma capa da galeria."
   },
   "feed": {
     "title": "Feed de aura",
