@@ -75,7 +75,7 @@ function openAnalysis(
       router.push(`/(app)/reveal/${item.id}`);
       return;
     }
-    router.push(`/(app)/result/${item.id}`);
+    router.push(`/(app)/post/${item.id}`);
     return;
   }
   router.push(`/(app)/processing/${item.id}`);

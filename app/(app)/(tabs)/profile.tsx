@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Alert,
-  Image,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -15,9 +14,11 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/ui/text';
+import { Image } from 'expo-image';
 import { useAppDispatch, useAppSelector } from '@/src/core/hooks';
 import { TIER_BY_ID } from '@/src/features/aura/tiers';
 import { signOut } from '@/src/features/auth/authService';
+import { fetchAnalysisQuotaUsage } from '@/src/features/monetization/quotaApi';
 import {
   fetchPublicPostsGrid,
   fetchSocialCounts,
@@ -35,6 +36,7 @@ import {
 import { scoreColor } from '@/src/features/video-analysis/statusUi';
 import { AppMenuButton } from '@/src/shared/ui/AppMenuSheet';
 import { GradientButton } from '@/src/shared/ui/GradientButton';
+import { QuotaUsageCard } from '@/src/shared/ui/QuotaUsageCard';
 import { UserAvatar } from '@/src/shared/ui/UserAvatar';
 import { fonts, palette } from '@/src/shared/ui/theme';
 
@@ -73,6 +75,13 @@ export default function ProfileTabScreen() {
     queryKey: ['profile-grid', profile?.user_id],
     queryFn: () => fetchPublicPostsGrid(profile!.user_id),
     enabled: Boolean(profile?.user_id),
+  });
+
+  const { data: quotaUsage, isLoading: quotaLoading } = useQuery({
+    queryKey: ['analysis-quota', profile?.user_id, subscriptionTier],
+    queryFn: () => fetchAnalysisQuotaUsage(profile!.user_id, subscriptionTier),
+    enabled: Boolean(profile?.user_id),
+    staleTime: 15_000,
   });
 
   const handleSignOut = async () => {
@@ -190,6 +199,18 @@ export default function ProfileTabScreen() {
           </Text>
           {profile?.bio ? <Text style={styles.bio}>{profile.bio}</Text> : null}
 
+          {quotaLoading ? (
+            <ActivityIndicator
+              color={palette.primary}
+              style={{ marginVertical: 12 }}
+            />
+          ) : quotaUsage ? (
+            <QuotaUsageCard
+              usage={quotaUsage}
+              onPressUpgrade={() => router.push('/(app)/premium')}
+            />
+          ) : null}
+
           {!isPaidTier(subscriptionTier) ? (
             <GradientButton
               title={t('premium.ctaHub')}
@@ -242,13 +263,30 @@ export default function ProfileTabScreen() {
                         { borderColor: `${tier?.color ?? palette.primary}55` },
                       ]}
                     >
+                      {post.thumbnail_md_url || post.thumbnail_sm_url ? (
+                        <Image
+                          source={{
+                            uri:
+                              post.thumbnail_md_url ??
+                              post.thumbnail_sm_url ??
+                              undefined,
+                          }}
+                          style={StyleSheet.absoluteFill}
+                          contentFit="cover"
+                        />
+                      ) : null}
+                      <LinearGradient
+                        colors={['transparent', 'rgba(9,9,11,0.85)']}
+                        style={StyleSheet.absoluteFill}
+                      />
                       <Text
                         style={[
                           styles.gridTier,
                           { color: tier?.color ?? palette.textPrimary },
                         ]}
+                        numberOfLines={1}
                       >
-                        {tier?.label ?? post.tier_id}
+                        {post.title?.trim() || tier?.label || post.tier_id}
                       </Text>
                       <Text
                         style={[
@@ -407,13 +445,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     backgroundColor: palette.card,
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-end',
     gap: 4,
     padding: 6,
+    overflow: 'hidden',
   },
   gridTier: {
     fontFamily: fonts.semibold,
     fontSize: 11,
+    zIndex: 1,
   },
   gridScore: {
     fontFamily: fonts.bold,

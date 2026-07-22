@@ -89,7 +89,13 @@
     "uploadingImage": "Enviando imagem…",
     "defaultVisibility": "Visibilidade das novas medições",
     "imagePermission": "Permita acesso às fotos para escolher uma imagem.",
-    "imageUploadFailed": "Não foi possível enviar a imagem."
+    "imageUploadFailed": "Não foi possível enviar a imagem.",
+    "quotaTitle": "Subidas de vídeo",
+    "quotaSummary": "Você ainda pode enviar {{count}} medição(ões) agora (menor entre dia e mês).",
+    "quotaRemainingShort": "{{count}} rest.",
+    "quotaDepleted": "Esgotado",
+    "quotaDaily": "Restantes hoje",
+    "quotaMonthly": "Restantes no mês"
   },
   "menu": {
     "open": "Abrir menu",
@@ -195,7 +201,11 @@
     "privateHint": "Só você vê esta medição.",
     "meta": "{{source}} · {{seconds}}s · {{mb}} MB",
     "sourceCamera": "Gravação",
-    "sourceGallery": "Galeria"
+    "sourceGallery": "Galeria",
+    "titleLabel": "Título (opcional)",
+    "titlePlaceholder": "Dê um nome para esta medição",
+    "cover": "Capa",
+    "pickCover": "Galeria"
   },
   "feed": {
     "title": "Feed de aura",

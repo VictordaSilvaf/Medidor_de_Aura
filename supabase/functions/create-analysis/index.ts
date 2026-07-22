@@ -47,6 +47,7 @@ type Body = {
   fileName: string;
   visibility?: 'private' | 'public';
   challengeId?: string | null;
+  title?: string | null;
 };
 
 function json(data: unknown, status = 200) {
@@ -166,6 +167,11 @@ Deno.serve(async (req) => {
   const visibility =
     body.visibility === 'public' ? 'public' : 'private';
 
+  const title =
+    typeof body.title === 'string' && body.title.trim().length > 0
+      ? body.title.trim().slice(0, 80)
+      : null;
+
   const { data: analysis, error: insertError } = await service
     .from('video_analyses')
     .insert({
@@ -180,6 +186,7 @@ Deno.serve(async (req) => {
       visibility,
       challenge_id: body.challengeId ?? null,
       priority: limits.priority,
+      title,
     })
     .select('*')
     .single();

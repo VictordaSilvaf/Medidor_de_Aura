@@ -28,7 +28,7 @@ export async function fetchPublicFeed(
   let feedQuery = supabase
     .from('video_analyses')
     .select(
-      'id, user_id, posted_at, created_at, visibility, like_count, comment_count',
+      'id, user_id, posted_at, created_at, visibility, like_count, comment_count, title, thumbnail_sm_url, thumbnail_md_url, thumbnail_lg_url',
     )
     .eq('visibility', 'public')
     .eq('status', 'completed')
@@ -97,6 +97,10 @@ export async function fetchPublicFeed(
         avatar_url: profile.avatar_url,
         level: profile.level,
         video_url: playbackUrls[row.id] ?? null,
+        title: row.title ?? null,
+        thumbnail_sm_url: row.thumbnail_sm_url ?? null,
+        thumbnail_md_url: row.thumbnail_md_url ?? null,
+        thumbnail_lg_url: row.thumbnail_lg_url ?? null,
         like_count: row.like_count ?? 0,
         comment_count: row.comment_count ?? 0,
         liked_by_me: likedIds.has(row.id),

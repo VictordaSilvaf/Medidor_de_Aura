@@ -89,7 +89,13 @@
     "uploadingImage": "Uploading image…",
     "defaultVisibility": "New measurement visibility",
     "imagePermission": "Allow photo access to choose an image.",
-    "imageUploadFailed": "The image could not be uploaded."
+    "imageUploadFailed": "The image could not be uploaded.",
+    "quotaTitle": "Video uploads",
+    "quotaSummary": "You can still send {{count}} measurement(s) now (whichever is lower: day or month).",
+    "quotaRemainingShort": "{{count}} left",
+    "quotaDepleted": "Depleted",
+    "quotaDaily": "Left today",
+    "quotaMonthly": "Left this month"
   },
   "menu": {
     "open": "Open menu",
@@ -195,7 +201,11 @@
     "privateHint": "Only you see this measurement.",
     "meta": "{{source}} · {{seconds}}s · {{mb}} MB",
     "sourceCamera": "Recording",
-    "sourceGallery": "Gallery"
+    "sourceGallery": "Gallery",
+    "titleLabel": "Title (optional)",
+    "titlePlaceholder": "Name this measurement",
+    "cover": "Cover",
+    "pickCover": "Gallery"
   },
   "feed": {
     "title": "Aura feed",

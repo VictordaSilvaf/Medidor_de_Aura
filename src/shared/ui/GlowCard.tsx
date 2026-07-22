@@ -42,7 +42,6 @@ export function GlowCard({
           pointerEvents="none"
           intensity={35}
           tint="dark"
-          experimentalBlurMethod="dimezisBlurView"
           style={StyleSheet.absoluteFill}
         />
       ) : null}

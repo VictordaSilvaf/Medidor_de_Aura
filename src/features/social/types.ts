@@ -71,6 +71,10 @@ export type FeedPost = {
   avatar_url: string | null;
   level: number;
   video_url: string | null;
+  title: string | null;
+  thumbnail_sm_url: string | null;
+  thumbnail_md_url: string | null;
+  thumbnail_lg_url: string | null;
   like_count: number;
   comment_count: number;
   liked_by_me: boolean;

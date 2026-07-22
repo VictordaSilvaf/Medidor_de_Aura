@@ -31,6 +31,10 @@ export type VideoAnalysis = {
   visibility: VideoVisibility;
   posted_at: string | null;
   challenge_id: string | null;
+  title: string | null;
+  thumbnail_sm_url: string | null;
+  thumbnail_md_url: string | null;
+  thumbnail_lg_url: string | null;
   created_at: string;
   updated_at: string;
   completed_at: string | null;

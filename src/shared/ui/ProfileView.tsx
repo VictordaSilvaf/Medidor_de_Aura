@@ -1,7 +1,8 @@
 import { LinearGradient } from 'expo-linear-gradient';
+import { Image } from 'expo-image';
 import { Grid3X3, Heart, MessageCircle } from 'lucide-react-native';
 import type { ReactNode } from 'react';
-import { Image, Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { Text } from '@/components/ui/text';
@@ -26,6 +27,10 @@ export type ProfileGridPost = {
   created_at: string;
   like_count?: number;
   comment_count?: number;
+  title?: string | null;
+  thumbnail_sm_url?: string | null;
+  thumbnail_md_url?: string | null;
+  thumbnail_lg_url?: string | null;
 };
 
 function Stat({
@@ -71,7 +76,7 @@ export function ProfileHeader({
         {profile.banner_url ? (
           <Image
             source={{ uri: profile.banner_url }}
-            resizeMode="cover"
+            contentFit="cover"
             style={StyleSheet.absoluteFill}
           />
         ) : (
@@ -175,13 +180,27 @@ export function ProfilePostsGrid({
                     { borderColor: `${tier?.color ?? palette.primary}55` },
                   ]}
                 >
+                  {post.thumbnail_md_url || post.thumbnail_sm_url ? (
+                    <Image
+                      source={{
+                        uri: post.thumbnail_md_url ?? post.thumbnail_sm_url ?? undefined,
+                      }}
+                      style={StyleSheet.absoluteFill}
+                      contentFit="cover"
+                    />
+                  ) : null}
+                  <LinearGradient
+                    colors={['transparent', 'rgba(9,9,11,0.85)']}
+                    style={styles.gridOverlay}
+                  />
                   <Text
                     style={[
                       styles.gridTier,
                       { color: tier?.color ?? palette.textPrimary },
                     ]}
+                    numberOfLines={1}
                   >
-                    {tier?.label ?? post.tier_id}
+                    {post.title?.trim() || tier?.label || post.tier_id}
                   </Text>
                   <Text
                     style={[styles.gridScore, { color: scoreColor(post.score) }]}
@@ -307,15 +326,20 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     backgroundColor: palette.card,
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-end',
     gap: 4,
     padding: 6,
+    overflow: 'hidden',
   },
-  gridTier: { fontFamily: fonts.semibold, fontSize: 11 },
+  gridOverlay: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  gridTier: { fontFamily: fonts.semibold, fontSize: 11, zIndex: 1 },
   gridScore: {
     fontFamily: fonts.bold,
     fontSize: 15,
     fontVariant: ['tabular-nums'],
+    zIndex: 1,
   },
   gridEngagement: {
     flexDirection: 'row',

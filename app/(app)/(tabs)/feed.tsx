@@ -20,6 +20,7 @@ import Animated, { FadeIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/ui/text';
+import { Image } from 'expo-image';
 import { useAppSelector } from '@/src/core/hooks';
 import { TIER_BY_ID } from '@/src/features/aura/tiers';
 import { selectAuthUser } from '@/src/features/auth/authSlice';
@@ -96,12 +97,25 @@ function FeedCard({
           {tier?.label ?? item.tier_id}
         </Text>
       </View>
+      {item.title ? (
+        <Text style={styles.postTitle} numberOfLines={2}>
+          {item.title}
+        </Text>
+      ) : null}
       <Text style={styles.score}>{t('feed.score', { score: item.score })}</Text>
       {item.video_url ? (
         <VideoView
           player={player}
           style={styles.video}
           nativeControls
+          contentFit="cover"
+        />
+      ) : item.thumbnail_md_url || item.thumbnail_lg_url ? (
+        <Image
+          source={{
+            uri: item.thumbnail_lg_url ?? item.thumbnail_md_url ?? undefined,
+          }}
+          style={styles.video}
           contentFit="cover"
         />
       ) : null}
@@ -433,6 +447,12 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bold,
     fontSize: 22,
     marginTop: 14,
+  },
+  postTitle: {
+    color: palette.textSecondary,
+    fontFamily: fonts.medium,
+    fontSize: 14,
+    marginTop: 8,
   },
   video: {
     width: '100%',

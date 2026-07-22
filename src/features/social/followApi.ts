@@ -128,7 +128,9 @@ async function hydrateProfiles(userIds: string[]): Promise<FollowListItem[]> {
 export async function fetchPublicPostsGrid(userId: string, limit = 30) {
   const { data: analyses, error } = await supabase
     .from('video_analyses')
-    .select('id, created_at, posted_at, like_count, comment_count')
+    .select(
+      'id, created_at, posted_at, like_count, comment_count, title, thumbnail_sm_url, thumbnail_md_url, thumbnail_lg_url',
+    )
     .eq('user_id', userId)
     .eq('visibility', 'public')
     .eq('status', 'completed')
@@ -158,6 +160,10 @@ export async function fetchPublicPostsGrid(userId: string, limit = 30) {
         created_at: a.created_at as string,
         like_count: Number(a.like_count ?? 0),
         comment_count: Number(a.comment_count ?? 0),
+        title: (a.title as string | null) ?? null,
+        thumbnail_sm_url: (a.thumbnail_sm_url as string | null) ?? null,
+        thumbnail_md_url: (a.thumbnail_md_url as string | null) ?? null,
+        thumbnail_lg_url: (a.thumbnail_lg_url as string | null) ?? null,
       };
     })
     .filter(Boolean) as {
@@ -167,6 +173,10 @@ export async function fetchPublicPostsGrid(userId: string, limit = 30) {
     created_at: string;
     like_count: number;
     comment_count: number;
+    title: string | null;
+    thumbnail_sm_url: string | null;
+    thumbnail_md_url: string | null;
+    thumbnail_lg_url: string | null;
   }[];
 }
 

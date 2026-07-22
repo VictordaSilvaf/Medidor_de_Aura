@@ -51,6 +51,7 @@ export async function createAnalysisAndUploadUrl(input: {
   fileName: string;
   visibility: VideoVisibility;
   challengeId?: string | null;
+  title?: string | null;
 }): Promise<CreateAnalysisResponse> {
   return invokeFunction<CreateAnalysisResponse>('create-analysis', {
     source: input.source,
@@ -60,6 +61,7 @@ export async function createAnalysisAndUploadUrl(input: {
     fileName: input.fileName,
     visibility: input.visibility,
     challengeId: input.challengeId ?? null,
+    title: input.title?.trim() ? input.title.trim().slice(0, 80) : null,
   });
 }
 
@@ -172,6 +174,10 @@ export async function submitPendingCapture(input: {
   fileName: string;
   visibility: VideoVisibility;
   challengeId?: string | null;
+  title?: string | null;
+  /** Local file URI or VideoThumbnail SharedRef for poster. */
+  thumbnailSource?: string | import('expo-video').VideoThumbnail | null;
+  userId?: string;
   onUploadProgress?: (ratio: number) => void;
 }): Promise<VideoAnalysis> {
   const created = await createAnalysisAndUploadUrl({
@@ -182,6 +188,7 @@ export async function submitPendingCapture(input: {
     fileName: input.fileName,
     visibility: input.visibility,
     challengeId: input.challengeId,
+    title: input.title,
   });
 
   await uploadVideoToR2({
@@ -191,6 +198,24 @@ export async function submitPendingCapture(input: {
     headers: created.headers,
     onProgress: input.onUploadProgress,
   });
+
+  if (input.thumbnailSource && input.userId) {
+    try {
+      const { uploadAnalysisThumbnails } = await import('./thumbnailApi');
+      const thumbs = await uploadAnalysisThumbnails({
+        userId: input.userId,
+        analysisId: created.analysis.id,
+        source: input.thumbnailSource,
+      });
+      await supabase
+        .from('video_analyses')
+        .update(thumbs)
+        .eq('id', created.analysis.id)
+        .eq('user_id', input.userId);
+    } catch (thumbError) {
+      console.warn('[upload] thumbnail upload failed', thumbError);
+    }
+  }
 
   return confirmUpload(created.analysis.id);
 }

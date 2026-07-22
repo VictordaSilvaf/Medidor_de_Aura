@@ -5,6 +5,7 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import * as Linking from 'expo-linking';
+import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import {
@@ -299,6 +300,22 @@ export default function PostDetailScreen() {
                 nativeControls
                 contentFit="cover"
               />
+            ) : data.analysis.thumbnail_lg_url ||
+              data.analysis.thumbnail_md_url ? (
+              <Image
+                source={{
+                  uri:
+                    data.analysis.thumbnail_lg_url ??
+                    data.analysis.thumbnail_md_url ??
+                    undefined,
+                }}
+                style={styles.video}
+                contentFit="cover"
+              />
+            ) : null}
+
+            {data.analysis.title ? (
+              <Text style={styles.postTitle}>{data.analysis.title}</Text>
             ) : null}
 
             <Text
@@ -539,6 +556,13 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bold,
     fontSize: 36,
     textAlign: 'center',
+  },
+  postTitle: {
+    color: palette.textSecondary,
+    fontFamily: fonts.semibold,
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 8,
   },
   score: {
     color: palette.textPrimary,

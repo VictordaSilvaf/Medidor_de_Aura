@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { ChevronLeft, Film, Upload } from 'lucide-react-native';
 import { useTranslation } from 'react-i18next';
@@ -48,7 +49,8 @@ function openAnalysis(
       router.push(`/(app)/reveal/${item.id}`);
       return;
     }
-    router.push(`/(app)/result/${item.id}`);
+    // Open the post screen so the video actually plays.
+    router.push(`/(app)/post/${item.id}`);
     return;
   }
   if (item.status === 'failed') {
@@ -120,21 +122,31 @@ export default function UploadsScreen() {
               : null;
             const unseen =
               item.status === 'completed' && !seenIds.includes(item.id);
+            const thumb =
+              item.thumbnail_sm_url ?? item.thumbnail_md_url ?? null;
             return (
               <Pressable
                 onPress={() => openAnalysis(item, seenIds, router)}
                 style={[styles.row, unseen && styles.rowUnseen]}
               >
-                <View
-                  style={[
-                    styles.dot,
-                    { backgroundColor: statusColor(item.status) },
-                  ]}
-                />
+                {thumb ? (
+                  <Image
+                    source={{ uri: thumb }}
+                    style={styles.thumb}
+                    contentFit="cover"
+                  />
+                ) : (
+                  <View
+                    style={[
+                      styles.dot,
+                      { backgroundColor: statusColor(item.status) },
+                    ]}
+                  />
+                )}
                 <View style={styles.rowBody}>
                   <View style={styles.rowTop}>
-                    <Text style={styles.rowStatus}>
-                      {statusLabel(item.status)}
+                    <Text style={styles.rowStatus} numberOfLines={1}>
+                      {item.title?.trim() || statusLabel(item.status)}
                       {unseen ? ` · ${t('uploads.newBadge')}` : ''}
                     </Text>
                     <Text style={styles.rowWhen}>
@@ -229,17 +241,24 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: palette.borderSubtle,
     backgroundColor: palette.card,
-    paddingHorizontal: 14,
-    paddingVertical: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
   },
   rowUnseen: {
     borderColor: `${palette.primary}66`,
     backgroundColor: `${palette.primary}14`,
   },
+  thumb: {
+    width: 52,
+    height: 68,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255,255,255,0.04)',
+  },
   dot: {
     width: 10,
     height: 10,
     borderRadius: 5,
+    marginHorizontal: 21,
   },
   rowBody: {
     flex: 1,
@@ -251,6 +270,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   rowStatus: {
+    flex: 1,
     color: palette.textPrimary,
     fontFamily: fonts.semibold,
     fontSize: 14,
