@@ -207,7 +207,7 @@ export default function ProfileTabScreen() {
           ) : quotaUsage ? (
             <QuotaUsageCard
               usage={quotaUsage}
-              onPressUpgrade={() => router.push('/(app)/premium')}
+              onPressUpgrade={() => router.push('/premium')}
             />
           ) : null}
 
@@ -215,7 +215,7 @@ export default function ProfileTabScreen() {
             <GradientButton
               title={t('premium.ctaHub')}
               icon={<Crown size={16} color="#FFF" />}
-              onPress={() => router.push('/(app)/premium')}
+              onPress={() => router.push('/premium')}
               style={{ marginBottom: 12 }}
             />
           ) : null}

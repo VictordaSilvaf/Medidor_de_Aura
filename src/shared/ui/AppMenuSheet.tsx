@@ -80,10 +80,10 @@ export function AppMenuSheet({
 
   const go = (href: string) => {
     onClose();
-    // Defer navigation so the modal unmounts cleanly.
-    requestAnimationFrame(() => {
+    // Modal must finish unmounting before stack push (esp. /premium).
+    setTimeout(() => {
       router.push(href as never);
-    });
+    }, 250);
   };
 
   const items: MenuItem[] = [
@@ -121,7 +121,7 @@ export function AppMenuSheet({
       key: 'premium',
       label: t('menu.premium'),
       icon: <Crown size={20} color={palette.neon} />,
-      onPress: () => go('/(app)/premium'),
+      onPress: () => go('/premium'),
     },
     {
       key: 'uploads',

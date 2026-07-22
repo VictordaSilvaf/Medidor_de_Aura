@@ -30,7 +30,10 @@ export const TIER_ORDER: SubscriptionTier[] = [
   'divino',
 ];
 
-/** RevenueCat entitlement identifiers (configure in RC dashboard). */
+/**
+ * Legacy per-tier entitlement ids (optional multi-plan setup).
+ * Primary product uses `Medidor_de_Aura Pro` — see revenueCatConfig.ts.
+ */
 export const RC_ENTITLEMENTS: Record<Exclude<SubscriptionTier, 'free'>, string> =
   {
     ascendente: 'ascendente',
@@ -55,6 +58,14 @@ export function tierFromEntitlements(
   activeEntitlementIds: string[],
 ): SubscriptionTier {
   const set = new Set(activeEntitlementIds.map((id) => id.toLowerCase()));
+  // Single Pro entitlement (dashboard) → lendario quotas
+  if (
+    set.has('medidor_de_aura pro') ||
+    set.has('medidor_de_aura_pro') ||
+    [...set].some((id) => id.includes('medidor_de_aura') && id.includes('pro'))
+  ) {
+    return 'lendario';
+  }
   if (set.has(RC_ENTITLEMENTS.divino)) return 'divino';
   if (set.has(RC_ENTITLEMENTS.lendario)) return 'lendario';
   if (set.has(RC_ENTITLEMENTS.ascendente)) return 'ascendente';

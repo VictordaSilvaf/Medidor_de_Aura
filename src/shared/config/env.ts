@@ -22,6 +22,10 @@ const envSchema = z
       emptyToUndefined,
       z.string().optional(),
     ),
+    EXPO_PUBLIC_REVENUECAT_API_KEY: z.preprocess(
+      emptyToUndefined,
+      z.string().optional(),
+    ),
     EXPO_PUBLIC_REVENUECAT_API_KEY_IOS: z.preprocess(
       emptyToUndefined,
       z.string().optional(),
@@ -58,6 +62,7 @@ function readEnv(): AppEnv {
     EXPO_PUBLIC_API_URL: process.env.EXPO_PUBLIC_API_URL,
     EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY:
       process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+    EXPO_PUBLIC_REVENUECAT_API_KEY: process.env.EXPO_PUBLIC_REVENUECAT_API_KEY,
     EXPO_PUBLIC_REVENUECAT_API_KEY_IOS:
       process.env.EXPO_PUBLIC_REVENUECAT_API_KEY_IOS,
     EXPO_PUBLIC_REVENUECAT_API_KEY_ANDROID:

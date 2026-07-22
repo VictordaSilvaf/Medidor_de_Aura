@@ -13,6 +13,9 @@ const ENTITLEMENT_TO_TIER: Record<string, SubscriptionTier> = {
   ascendente: 'ascendente',
   lendario: 'lendario',
   divino: 'divino',
+  // Primary Expo offering entitlement
+  'medidor_de_aura pro': 'lendario',
+  medidor_de_aura_pro: 'lendario',
 };
 
 function json(data: unknown, status = 200) {
@@ -25,7 +28,12 @@ function json(data: unknown, status = 200) {
 function tierFromEntitlementIds(ids: string[]): SubscriptionTier {
   let best: SubscriptionTier = 'free';
   for (const raw of ids) {
-    const mapped = ENTITLEMENT_TO_TIER[raw.toLowerCase()];
+    const key = raw.toLowerCase();
+    const mapped =
+      ENTITLEMENT_TO_TIER[key] ??
+      (key.includes('medidor_de_aura') && key.includes('pro')
+        ? 'lendario'
+        : undefined);
     if (mapped && TIER_RANK[mapped] > TIER_RANK[best]) {
       best = mapped;
     }
@@ -39,6 +47,11 @@ function tierFromProductId(productId: string | null | undefined): SubscriptionTi
   if (lower.includes('divino')) return 'divino';
   if (lower.includes('lendario') || lower.includes('lendário')) return 'lendario';
   if (lower.includes('ascendente')) return 'ascendente';
+  // monthly / yearly Pro products
+  if (lower.includes('yearly') || lower.includes('annual') || lower.includes('monthly')) {
+    return 'lendario';
+  }
+  if (lower.includes('pro')) return 'lendario';
   return 'free';
 }
 

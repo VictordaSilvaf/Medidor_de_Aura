@@ -315,7 +315,7 @@ export default function HubScreen() {
         {!isPremium ? (
           <Pressable
             accessibilityRole="button"
-            onPress={() => router.push('/(app)/premium')}
+            onPress={() => router.push('/premium')}
             style={styles.premiumCta}
           >
             <View style={styles.premiumCtaIcon}>

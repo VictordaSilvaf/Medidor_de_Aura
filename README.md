@@ -78,7 +78,7 @@ cp .env.example .env
 | `EXPO_PUBLIC_API_URL` | (opcional) base Axios |
 | `EXPO_PUBLIC_EAS_PROJECT_ID` | Push Expo (após `eas init`) |
 | `EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stub monetização |
-| `EXPO_PUBLIC_REVENUECAT_API_KEY_*` | Stub monetização |
+| `EXPO_PUBLIC_REVENUECAT_API_KEY_*` | RevenueCat public SDK keys (iOS/Android; test key ok in sandbox) |
 
 ### 3️⃣ Suba o Metro
 

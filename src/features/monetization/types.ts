@@ -1,4 +1,4 @@
-export type Entitlement = 'premium_scan' | 'premium_insights';
+export type Entitlement = 'premium_scan' | 'premium_insights' | 'pro';
 
 export type PurchaseChannel = 'revenuecat' | 'stripe';
 
@@ -8,7 +8,7 @@ export interface MonetizationPort {
   readonly channel: PurchaseChannel;
   getEntitlements(): Promise<Entitlement[]>;
   purchase(productId: ProductId): Promise<void>;
-  restore(): Promise<void>;
+  restore(): Promise<unknown>;
 }
 
 export class MonetizationNotConfiguredError extends Error {

@@ -30,3 +30,22 @@ export function getMonetization(
 }
 
 export { revenueCat, stripe };
+export {
+  RC_PRO_ENTITLEMENT,
+  RC_PACKAGE_MONTHLY,
+  RC_PACKAGE_YEARLY,
+} from '@/src/features/monetization/revenueCatConfig';
+export {
+  hasProEntitlement,
+  revenueCatMonetization,
+  tierFromCustomerInfo,
+} from '@/src/features/monetization/revenueCatAdapter';
+export {
+  bootstrapMonetization,
+  presentProPaywall,
+  presentProPaywallIfNeeded,
+  presentCustomerCenter,
+  restoreSubscriptions,
+  syncProfileFromCustomerInfo,
+  refreshCustomerInfo,
+} from '@/src/features/monetization/monetizationBootstrap';

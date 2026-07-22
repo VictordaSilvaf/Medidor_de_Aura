@@ -18,6 +18,7 @@ import { useVideoPlayer, VideoView, type VideoThumbnail } from 'expo-video';
 import { useAppDispatch, useAppSelector } from '@/src/core/hooks';
 import { selectAuthUser } from '@/src/features/auth/authSlice';
 import { selectDefaultVisibility } from '@/src/features/prefs/prefsSlice';
+import { presentProPaywallIfNeeded } from '@/src/features/monetization/monetizationBootstrap';
 import { isQuotaExceededError } from '@/src/features/monetization/quotaErrors';
 import type { VideoVisibility } from '@/src/features/social/types';
 import { submitPendingCapture } from '@/src/features/video-analysis/analysisApi';
@@ -154,7 +155,25 @@ export default function PreviewScreen() {
             { text: t('common.cancel'), style: 'cancel' },
             {
               text: t('premium.upgrade'),
-              onPress: () => router.push('/(app)/premium'),
+              onPress: () => {
+                void (async () => {
+                  if (!user?.id) {
+                    router.push('/premium');
+                    return;
+                  }
+                  try {
+                    const { purchased } = await presentProPaywallIfNeeded(
+                      dispatch,
+                      user.id,
+                    );
+                    if (!purchased) {
+                      router.push('/premium');
+                    }
+                  } catch {
+                    router.push('/premium');
+                  }
+                })();
+              },
             },
           ],
         );
