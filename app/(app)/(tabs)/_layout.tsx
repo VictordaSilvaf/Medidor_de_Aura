@@ -14,12 +14,13 @@ import {
   selectProfileLoading,
   selectSetupRequired,
 } from '@/src/features/social/profileSlice';
-import { palette } from '@/src/shared/ui/theme';
+import { usePalette } from '@/src/shared/ui/theme';
 
 export default function TabsLayout() {
   const { t } = useTranslation();
   const setupRequired = useAppSelector(selectSetupRequired);
   const profileLoading = useAppSelector(selectProfileLoading);
+  const palette = usePalette();
 
   if (!profileLoading && setupRequired) {
     return <Redirect href="/(app)/profile/setup" />;

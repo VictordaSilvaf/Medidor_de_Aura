@@ -1,8 +1,14 @@
-import { useState } from 'react';
-import { Image, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { useState } from "react";
+import {
+  Image,
+  StyleSheet,
+  View,
+  type StyleProp,
+  type ViewStyle,
+} from "react-native";
 
-import { Text } from '@/components/ui/text';
-import { fonts, palette } from '@/src/shared/ui/theme';
+import { Text } from "@/components/ui/text";
+import { fonts, usePalette } from "@/src/shared/ui/theme";
 
 type Props = {
   uri?: string | null;
@@ -17,11 +23,13 @@ export function UserAvatar({
   name,
   size = 44,
   style,
-  accentColor = palette.primary,
+  accentColor,
 }: Props) {
-  const letter = (name?.trim()?.[0] ?? '?').toUpperCase();
+  const letter = (name?.trim()?.[0] ?? "?").toUpperCase();
   const radius = size / 2;
   const [failedUri, setFailedUri] = useState<string | null>(null);
+  const palette = usePalette();
+  const accent = accentColor ?? palette.primary;
 
   if (uri && failedUri !== uri) {
     return (
@@ -50,7 +58,7 @@ export function UserAvatar({
           width: size,
           height: size,
           borderRadius: radius,
-          backgroundColor: `${accentColor}33`,
+          backgroundColor: `${accent}33`,
         },
         style,
       ]}
@@ -58,7 +66,7 @@ export function UserAvatar({
       <Text
         style={[
           styles.letter,
-          { color: accentColor, fontSize: Math.max(12, size * 0.38) },
+          { color: accent, fontSize: Math.max(12, size * 0.38) },
         ]}
       >
         {letter}
@@ -69,8 +77,8 @@ export function UserAvatar({
 
 const styles = StyleSheet.create({
   fallback: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   letter: {
     fontFamily: fonts.bold,

@@ -1,8 +1,8 @@
-import { useQuery } from '@tanstack/react-query';
-import { useRouter } from 'expo-router';
-import { Search } from 'lucide-react-native';
-import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "expo-router";
+import { Search } from "lucide-react-native";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   FlatList,
@@ -10,34 +10,46 @@ import {
   StyleSheet,
   TextInput,
   View,
-} from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { Text } from '@/components/ui/text';
-import { useAppSelector } from '@/src/core/hooks';
-import { selectAuthUser } from '@/src/features/auth/authSlice';
+import { Text } from "@/components/ui/text";
+import { useAppSelector } from "@/src/core/hooks";
+import { selectAuthUser } from "@/src/features/auth/authSlice";
 import {
   searchUsers,
   type UserSearchHit,
-} from '@/src/features/social/profileApi';
-import { UserAvatar } from '@/src/shared/ui/UserAvatar';
-import { fonts, palette } from '@/src/shared/ui/theme';
+} from "@/src/features/social/profileApi";
+import { UserAvatar } from "@/src/shared/ui/UserAvatar";
+import {
+  fonts,
+  useThemedStyles,
+  usePalette,
+  type AppPalette,
+} from "@/src/shared/ui/theme";
 
 export default function SearchScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const user = useAppSelector(selectAuthUser);
-  const [input, setInput] = useState('');
-  const [debounced, setDebounced] = useState('');
+  const [input, setInput] = useState("");
+  const [debounced, setDebounced] = useState("");
+  const palette = usePalette();
+  const styles = useThemedStyles(createStyles);
 
   useEffect(() => {
     const id = setTimeout(() => setDebounced(input.trim()), 300);
     return () => clearTimeout(id);
   }, [input]);
 
-  const { data = [], isFetching, isError, error } = useQuery({
-    queryKey: ['user-search', debounced],
+  const {
+    data = [],
+    isFetching,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["user-search", debounced],
     queryFn: () => searchUsers(debounced, 30, user?.id),
     enabled: debounced.length >= 1,
   });
@@ -45,7 +57,7 @@ export default function SearchScreen() {
   return (
     <View style={[styles.root, { paddingTop: insets.top + 8 }]}>
       <View style={styles.topBar}>
-        <Text style={styles.title}>{t('search.title')}</Text>
+        <Text style={styles.title}>{t("search.title")}</Text>
       </View>
 
       <View style={styles.searchWrap}>
@@ -53,7 +65,7 @@ export default function SearchScreen() {
         <TextInput
           value={input}
           onChangeText={setInput}
-          placeholder={t('search.placeholder')}
+          placeholder={t("search.placeholder")}
           placeholderTextColor={palette.textDisabled}
           autoCapitalize="none"
           autoCorrect={false}
@@ -63,12 +75,12 @@ export default function SearchScreen() {
       </View>
 
       {debounced.length < 1 ? (
-        <Text style={styles.hint}>{t('search.hint')}</Text>
+        <Text style={styles.hint}>{t("search.hint")}</Text>
       ) : isFetching && data.length === 0 ? (
         <ActivityIndicator color={palette.primary} style={{ marginTop: 32 }} />
       ) : isError ? (
         <Text style={styles.hint}>
-          {error instanceof Error ? error.message : t('common.error')}
+          {error instanceof Error ? error.message : t("common.error")}
         </Text>
       ) : (
         <FlatList
@@ -82,7 +94,7 @@ export default function SearchScreen() {
             flexGrow: 1,
           }}
           ListEmptyComponent={
-            <Text style={styles.hint}>{t('search.empty')}</Text>
+            <Text style={styles.hint}>{t("search.empty")}</Text>
           }
           renderItem={({ item }: { item: UserSearchHit }) => (
             <Pressable
@@ -108,64 +120,65 @@ export default function SearchScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: palette.bg },
-  topBar: {
-    paddingHorizontal: 20,
-    marginBottom: 8,
-  },
-  title: {
-    color: palette.textPrimary,
-    fontFamily: fonts.bold,
-    fontSize: 22,
-  },
-  searchWrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginHorizontal: 16,
-    marginBottom: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    borderRadius: 14,
-    backgroundColor: palette.card,
-    borderWidth: 1,
-    borderColor: palette.borderSubtle,
-  },
-  input: {
-    flex: 1,
-    color: palette.textPrimary,
-    fontFamily: fonts.medium,
-    fontSize: 16,
-    padding: 0,
-  },
-  hint: {
-    color: palette.textSecondary,
-    fontFamily: fonts.medium,
-    textAlign: 'center',
-    marginTop: 40,
-    paddingHorizontal: 32,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderRadius: 14,
-    backgroundColor: palette.card,
-    borderWidth: 1,
-    borderColor: palette.borderSubtle,
-  },
-  name: {
-    color: palette.textPrimary,
-    fontFamily: fonts.semibold,
-    fontSize: 15,
-  },
-  username: {
-    color: palette.textSecondary,
-    fontFamily: fonts.medium,
-    fontSize: 13,
-    marginTop: 2,
-  },
-});
+const createStyles = (palette: AppPalette) =>
+  StyleSheet.create({
+    root: { flex: 1, backgroundColor: palette.bg },
+    topBar: {
+      paddingHorizontal: 20,
+      marginBottom: 8,
+    },
+    title: {
+      color: palette.textPrimary,
+      fontFamily: fonts.bold,
+      fontSize: 22,
+    },
+    searchWrap: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+      marginHorizontal: 16,
+      marginBottom: 12,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      borderRadius: 14,
+      backgroundColor: palette.card,
+      borderWidth: 1,
+      borderColor: palette.borderSubtle,
+    },
+    input: {
+      flex: 1,
+      color: palette.textPrimary,
+      fontFamily: fonts.medium,
+      fontSize: 16,
+      padding: 0,
+    },
+    hint: {
+      color: palette.textSecondary,
+      fontFamily: fonts.medium,
+      textAlign: "center",
+      marginTop: 40,
+      paddingHorizontal: 32,
+    },
+    row: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 12,
+      paddingVertical: 10,
+      paddingHorizontal: 12,
+      borderRadius: 14,
+      backgroundColor: palette.card,
+      borderWidth: 1,
+      borderColor: palette.borderSubtle,
+    },
+    name: {
+      color: palette.textPrimary,
+      fontFamily: fonts.semibold,
+      fontSize: 15,
+    },
+    username: {
+      color: palette.textSecondary,
+      fontFamily: fonts.medium,
+      fontSize: 13,
+      marginTop: 2,
+    },
+  });

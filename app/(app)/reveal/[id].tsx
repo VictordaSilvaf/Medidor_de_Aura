@@ -32,7 +32,7 @@ import { AuraOrb } from '@/src/shared/ui/AuraOrb';
 import { AuraParticles } from '@/src/shared/ui/AuraParticles';
 import { GlowCard } from '@/src/shared/ui/GlowCard';
 import { GradientButton } from '@/src/shared/ui/GradientButton';
-import { brandGradient, fonts, palette } from '@/src/shared/ui/theme';
+import { brandGradient, fonts, usePalette, useThemedStyles, type AppPalette } from '@/src/shared/ui/theme';
 
 const COUNT_UP_MS = 2800;
 const PHASE_LABELS = [
@@ -47,6 +47,8 @@ export default function RevealScreen() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const insets = useSafeAreaInsets();
+  const palette = usePalette();
+  const styles = useThemedStyles(createStyles);
   const user = useAppSelector(selectAuthUser);
   const seenIds = useAppSelector(selectSeenRevealIds);
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -308,7 +310,8 @@ export default function RevealScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (palette: AppPalette) =>
+  StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: palette.bg,

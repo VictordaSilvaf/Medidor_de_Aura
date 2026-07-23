@@ -51,7 +51,13 @@
     }
   }
 
-  :root.dark {
+  /*
+   * Forced theme classes (set on GluestackUIProvider). Placed after the
+   * media query so user preference overrides OS prefers-color-scheme.
+   * Match both `:root.dark` (web document) and `.dark` (RN provider View).
+   */
+  :root.dark,
+  .dark {
     --primary: 109 93 252;
     --primary-foreground: 255 255 255;
     --card: 22 22 31;
@@ -71,7 +77,8 @@
     --accent-foreground: 255 255 255;
   }
 
-  :root.light {
+  :root.light,
+  .light {
     --primary: 109 93 252;
     --primary-foreground: 255 255 255;
     --card: 255 255 255;

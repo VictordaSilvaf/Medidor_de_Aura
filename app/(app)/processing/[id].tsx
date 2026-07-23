@@ -14,7 +14,7 @@ import { useAnalysisSubscription } from '@/src/features/video-analysis/useAnalys
 import { AuraOrb } from '@/src/shared/ui/AuraOrb';
 import { AuraParticles } from '@/src/shared/ui/AuraParticles';
 import { GradientButton } from '@/src/shared/ui/GradientButton';
-import { brandGradient, fonts, palette } from '@/src/shared/ui/theme';
+import { brandGradient, fonts, usePalette, useThemedStyles, type AppPalette } from '@/src/shared/ui/theme';
 
 const STATUS_COPY: Record<string, string> = {
   pending_upload: 'Preparando upload…',
@@ -28,6 +28,8 @@ const STATUS_COPY: Record<string, string> = {
 export default function ProcessingScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const palette = usePalette();
+  const styles = useThemedStyles(createStyles);
   const { id } = useLocalSearchParams<{ id: string }>();
   const { analysis, error, loading } = useAnalysisSubscription(id);
 
@@ -95,7 +97,8 @@ export default function ProcessingScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (palette: AppPalette) =>
+  StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: palette.bg,

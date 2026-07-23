@@ -22,7 +22,7 @@ type PrefsState = {
 
 const initialState: PrefsState = {
   hasCompletedOnboarding: false,
-  themeMode: 'dark',
+  themeMode: 'system',
   locale: null,
   defaultVisibility: 'public',
   pushEnabled: true,

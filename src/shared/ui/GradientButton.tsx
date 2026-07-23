@@ -1,5 +1,5 @@
-import { LinearGradient } from 'expo-linear-gradient';
-import type { ReactNode } from 'react';
+import { LinearGradient } from "expo-linear-gradient";
+import type { ReactNode } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -8,14 +8,21 @@ import {
   View,
   type StyleProp,
   type ViewStyle,
-} from 'react-native';
+} from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
-} from 'react-native-reanimated';
+} from "react-native-reanimated";
 
-import { brandGradient, fonts, palette, radius } from '@/src/shared/ui/theme';
+import {
+  brandGradient,
+  fonts,
+  radius,
+  useThemedStyles,
+  usePalette,
+  type AppPalette,
+} from "@/src/shared/ui/theme";
 
 type GradientButtonProps = {
   title: string;
@@ -23,7 +30,7 @@ type GradientButtonProps = {
   disabled?: boolean;
   loading?: boolean;
   /** primary = gradiente da marca; ghost = surface discreta com borda. */
-  variant?: 'primary' | 'ghost';
+  variant?: "primary" | "ghost";
   icon?: ReactNode;
   accessibilityLabel?: string;
   style?: StyleProp<ViewStyle>;
@@ -34,12 +41,14 @@ export function GradientButton({
   onPress,
   disabled = false,
   loading = false,
-  variant = 'primary',
+  variant = "primary",
   icon,
   accessibilityLabel,
   style,
 }: GradientButtonProps) {
   const scale = useSharedValue(1);
+  const palette = usePalette();
+  const styles = useThemedStyles(createStyles);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -51,7 +60,7 @@ export function GradientButton({
       <Text
         style={[
           styles.label,
-          variant === 'ghost' && { color: palette.textPrimary },
+          variant === "ghost" && { color: palette.textPrimary },
         ]}
       >
         {title}
@@ -75,7 +84,7 @@ export function GradientButton({
         }}
         style={[styles.pressable, (disabled || loading) && styles.disabled]}
       >
-        {variant === 'primary' ? (
+        {variant === "primary" ? (
           <LinearGradient
             colors={[...brandGradient]}
             start={{ x: 0, y: 0.5 }}
@@ -92,38 +101,39 @@ export function GradientButton({
   );
 }
 
-const styles = StyleSheet.create({
-  pressable: {
-    borderRadius: radius.button,
-  },
-  disabled: {
-    opacity: 0.5,
-  },
-  fill: {
-    minHeight: 56,
-    borderRadius: radius.button,
-    borderCurve: 'continuous',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 24,
-  },
-  glow: {
-    boxShadow: `0 6px 28px -6px ${palette.primary}80`,
-  },
-  ghost: {
-    backgroundColor: 'rgba(255,255,255,0.04)',
-    borderWidth: 1,
-    borderColor: palette.borderSubtle,
-  },
-  content: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  label: {
-    color: '#FFFFFF',
-    fontFamily: fonts.semibold,
-    fontSize: 17,
-    letterSpacing: 0.2,
-  },
-});
+const createStyles = (palette: AppPalette) =>
+  StyleSheet.create({
+    pressable: {
+      borderRadius: radius.button,
+    },
+    disabled: {
+      opacity: 0.5,
+    },
+    fill: {
+      minHeight: 56,
+      borderRadius: radius.button,
+      borderCurve: "continuous",
+      alignItems: "center",
+      justifyContent: "center",
+      paddingHorizontal: 24,
+    },
+    glow: {
+      boxShadow: `0 6px 28px -6px ${palette.primary}80`,
+    },
+    ghost: {
+      backgroundColor: palette.segmentIdle,
+      borderWidth: 1,
+      borderColor: palette.borderSubtle,
+    },
+    content: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+    },
+    label: {
+      color: "#FFFFFF",
+      fontFamily: fonts.semibold,
+      fontSize: 17,
+      letterSpacing: 0.2,
+    },
+  });

@@ -19,7 +19,7 @@ import {
   type FollowListItem,
 } from '@/src/features/social/followApi';
 import { UserAvatar } from '@/src/shared/ui/UserAvatar';
-import { fonts, palette } from '@/src/shared/ui/theme';
+import { fonts, usePalette, useThemedStyles, type AppPalette } from '@/src/shared/ui/theme';
 
 type TabKey = 'followers' | 'following';
 
@@ -27,6 +27,8 @@ export default function ConnectionsScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const palette = usePalette();
+  const styles = useThemedStyles(createStyles);
   const { userId, tab } = useLocalSearchParams<{
     userId: string;
     tab?: string;
@@ -126,7 +128,8 @@ export default function ConnectionsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (palette: AppPalette) =>
+  StyleSheet.create({
   root: { flex: 1, backgroundColor: palette.bg },
   topBar: {
     flexDirection: 'row',

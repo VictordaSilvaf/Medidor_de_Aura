@@ -23,12 +23,14 @@ import {
 import { localizeChallengeText } from '@/src/features/social/types';
 import { setActiveChallengeId } from '@/src/features/video-analysis/pendingCaptureSlice';
 import { GradientButton } from '@/src/shared/ui/GradientButton';
-import { fonts, palette } from '@/src/shared/ui/theme';
+import { fonts, usePalette, useThemedStyles, type AppPalette } from '@/src/shared/ui/theme';
 
 export default function ChallengeDetailScreen() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const palette = usePalette();
+  const styles = useThemedStyles(createStyles);
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
   const user = useAppSelector(selectAuthUser);
@@ -125,7 +127,8 @@ export default function ChallengeDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (palette: AppPalette) =>
+  StyleSheet.create({
   root: { flex: 1, backgroundColor: palette.bg },
   centered: { alignItems: 'center', justifyContent: 'center' },
   top: {

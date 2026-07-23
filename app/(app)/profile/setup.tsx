@@ -13,12 +13,14 @@ import {
 import { setMyProfile } from '@/src/features/social/profileSlice';
 import { selectDefaultVisibility } from '@/src/features/prefs/prefsSlice';
 import { GradientButton } from '@/src/shared/ui/GradientButton';
-import { fonts, palette } from '@/src/shared/ui/theme';
+import { fonts, usePalette, useThemedStyles, type AppPalette } from '@/src/shared/ui/theme';
 
 export default function ProfileSetupScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const palette = usePalette();
+  const styles = useThemedStyles(createStyles);
   const dispatch = useAppDispatch();
   const user = useAppSelector(selectAuthUser);
   const defaultVisibility = useAppSelector(selectDefaultVisibility);
@@ -95,7 +97,8 @@ export default function ProfileSetupScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (palette: AppPalette) =>
+  StyleSheet.create({
   root: { flex: 1, backgroundColor: palette.bg, paddingHorizontal: 24 },
   title: {
     color: palette.textPrimary,

@@ -24,12 +24,14 @@ import {
 } from '@/src/features/social/profileSlice';
 import { GradientButton } from '@/src/shared/ui/GradientButton';
 import { UserAvatar } from '@/src/shared/ui/UserAvatar';
-import { fonts, palette } from '@/src/shared/ui/theme';
+import { fonts, usePalette, useThemedStyles, type AppPalette } from '@/src/shared/ui/theme';
 
 export default function ProfileEditScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const palette = usePalette();
+  const styles = useThemedStyles(createStyles);
   const dispatch = useAppDispatch();
   const profile = useAppSelector(selectMyProfile);
 
@@ -193,7 +195,7 @@ export default function ProfileEditScreen() {
           <Switch
             value={isPublic}
             onValueChange={setIsPublic}
-            trackColor={{ true: palette.primary, false: '#333' }}
+              trackColor={{ true: palette.primary, false: palette.switchTrackOff }}
           />
         </View>
 
@@ -234,7 +236,8 @@ export default function ProfileEditScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (palette: AppPalette) =>
+  StyleSheet.create({
   root: { flex: 1, backgroundColor: palette.bg },
   top: {
     flexDirection: 'row',

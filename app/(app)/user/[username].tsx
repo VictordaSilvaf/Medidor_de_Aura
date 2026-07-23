@@ -34,12 +34,14 @@ import {
   ProfileHeader,
   ProfilePostsGrid,
 } from '@/src/shared/ui/ProfileView';
-import { fonts, palette } from '@/src/shared/ui/theme';
+import { fonts, usePalette, useThemedStyles, type AppPalette } from '@/src/shared/ui/theme';
 
 export default function UserProfileScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const palette = usePalette();
+  const styles = useThemedStyles(createStyles);
   const queryClient = useQueryClient();
   const viewer = useAppSelector(selectAuthUser);
   const { username } = useLocalSearchParams<{ username: string }>();
@@ -201,7 +203,8 @@ export default function UserProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (palette: AppPalette) =>
+  StyleSheet.create({
   root: { flex: 1, backgroundColor: palette.bg },
   centered: { alignItems: 'center', justifyContent: 'center' },
   errorText: {

@@ -56,12 +56,14 @@ import type { PostComment } from '@/src/features/social/types';
 import { setActiveChallengeId } from '@/src/features/video-analysis/pendingCaptureSlice';
 import { GradientButton } from '@/src/shared/ui/GradientButton';
 import { UserAvatar } from '@/src/shared/ui/UserAvatar';
-import { fonts, palette } from '@/src/shared/ui/theme';
+import { fonts, usePalette, useThemedStyles, type AppPalette } from '@/src/shared/ui/theme';
 
 export default function PostDetailScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const palette = usePalette();
+  const styles = useThemedStyles(createStyles);
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
   const user = useAppSelector(selectAuthUser);
@@ -507,7 +509,8 @@ export default function PostDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (palette: AppPalette) =>
+  StyleSheet.create({
   root: { flex: 1, backgroundColor: palette.bg },
   centered: { alignItems: 'center', justifyContent: 'center', gap: 16 },
   top: {

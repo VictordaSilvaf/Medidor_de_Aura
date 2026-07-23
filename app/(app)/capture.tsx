@@ -1,20 +1,16 @@
-import { BlurView } from 'expo-blur';
-import { CameraView } from 'expo-camera';
-import { useRouter } from 'expo-router';
+import { BlurView } from "expo-blur";
+import { CameraView } from "expo-camera";
+import { useRouter } from "expo-router";
+import { Film, FlipHorizontal2, ImagePlus, X } from "lucide-react-native";
 import {
-  Film,
-  FlipHorizontal2,
-  ImagePlus,
-  X,
-} from 'lucide-react-native';
-import { useCallback, useEffect, useRef, useState, type ComponentRef } from 'react';
-import { useTranslation } from 'react-i18next';
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ComponentRef,
+} from "react";
+import { useTranslation } from "react-i18next";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import Animated, {
   FadeIn,
   FadeOut,
@@ -22,35 +18,40 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
-} from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+} from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { useAppDispatch, useAppSelector } from '@/src/core/hooks';
-import { selectCountdownSeconds } from '@/src/features/prefs/prefsSlice';
+import { useAppDispatch, useAppSelector } from "@/src/core/hooks";
+import { selectCountdownSeconds } from "@/src/features/prefs/prefsSlice";
 import {
   MAX_VIDEO_DURATION_MS,
   MAX_VIDEO_FILE_SIZE_BYTES,
-} from '@/src/features/video-analysis/constants';
-import { setPendingCapture } from '@/src/features/video-analysis/pendingCaptureSlice';
+} from "@/src/features/video-analysis/constants";
+import { setPendingCapture } from "@/src/features/video-analysis/pendingCaptureSlice";
 import {
   ensureCapturePermissions,
   openSystemSettings,
-} from '@/src/features/video-analysis/permissions';
-import { persistLocalVideo } from '@/src/features/video-analysis/persistLocalVideo';
-import { pickGalleryVideo } from '@/src/features/video-analysis/pickGalleryVideo';
-import { validateVideoMeta } from '@/src/features/video-analysis/validateVideo';
-import { appAlert } from '@/src/shared/ui/appAlert';
-import { CaptureSettingsIsland } from '@/src/shared/ui/CaptureSettingsIsland';
-import { GradientButton } from '@/src/shared/ui/GradientButton';
-import { fonts, palette } from '@/src/shared/ui/theme';
+} from "@/src/features/video-analysis/permissions";
+import { persistLocalVideo } from "@/src/features/video-analysis/persistLocalVideo";
+import { pickGalleryVideo } from "@/src/features/video-analysis/pickGalleryVideo";
+import { validateVideoMeta } from "@/src/features/video-analysis/validateVideo";
+import { appAlert } from "@/src/shared/ui/appAlert";
+import { CaptureSettingsIsland } from "@/src/shared/ui/CaptureSettingsIsland";
+import { GradientButton } from "@/src/shared/ui/GradientButton";
+import {
+  fonts,
+  palette,
+  useThemedStyles,
+  type AppPalette,
+} from "@/src/shared/ui/theme";
 
-type Phase = 'idle' | 'countdown' | 'recording';
+type Phase = "idle" | "countdown" | "recording";
 
 function formatSeconds(ms: number) {
   const total = Math.max(0, Math.ceil(ms / 1000));
   const m = Math.floor(total / 60);
   const s = total % 60;
-  return `${m}:${String(s).padStart(2, '0')}`;
+  return `${m}:${String(s).padStart(2, "0")}`;
 }
 
 export default function CaptureScreen() {
@@ -62,12 +63,15 @@ export default function CaptureScreen() {
 
   const countdownSeconds = useAppSelector(selectCountdownSeconds);
 
-  const [facing, setFacing] = useState<'front' | 'back'>('front');
+  const [facing, setFacing] = useState<"front" | "back">("front");
   const [ready, setReady] = useState(false);
   const [permissionOk, setPermissionOk] = useState<boolean | null>(null);
-  const [phase, setPhase] = useState<Phase>('idle');
+  const [phase, setPhase] = useState<Phase>("idle");
   const [countdown, setCountdown] = useState<number>(countdownSeconds);
   const [elapsedMs, setElapsedMs] = useState(0);
+  // Camera overlay chrome intentionally stays dark-biased for legibility
+  // over the viewfinder. Only the permission-denied root chrome themes.
+  const themedStyles = useThemedStyles(createRootStyles);
 
   const pulse = useSharedValue(1);
   const timersRef = useRef<
@@ -75,7 +79,8 @@ export default function CaptureScreen() {
   >([]);
 
   const clearTimers = useCallback(() => {
-    for (const t of timersRef.current) clearTimeout(t as ReturnType<typeof setTimeout>);
+    for (const t of timersRef.current)
+      clearTimeout(t as ReturnType<typeof setTimeout>);
     timersRef.current = [];
   }, []);
 
@@ -87,11 +92,11 @@ export default function CaptureScreen() {
       setPermissionOk(result.ok);
       if (!result.ok && !result.canAskAgain) {
         appAlert.warn(
-          'Permissões necessárias',
-          'Ative câmera e microfone nas configurações para medir sua aura.',
+          "Permissões necessárias",
+          "Ative câmera e microfone nas configurações para medir sua aura.",
           [
-            { text: 'Cancelar', style: 'cancel' },
-            { text: 'Abrir ajustes', onPress: () => void openSystemSettings() },
+            { text: "Cancelar", style: "cancel" },
+            { text: "Abrir ajustes", onPress: () => void openSystemSettings() },
           ],
         );
       }
@@ -109,7 +114,7 @@ export default function CaptureScreen() {
       fileSizeBytes: number;
       mimeType: string;
       fileName: string;
-      source: 'camera' | 'gallery';
+      source: "camera" | "gallery";
     }) => {
       try {
         const stableUri = await persistLocalVideo(video.uri, video.fileName);
@@ -123,13 +128,13 @@ export default function CaptureScreen() {
             fileName: video.fileName,
           }),
         );
-        router.push('/(app)/preview');
+        router.push("/(app)/preview");
       } catch (error) {
         const message =
           error instanceof Error
             ? error.message
-            : 'Não foi possível preparar o vídeo.';
-        appAlert.error('Vídeo', message);
+            : "Não foi possível preparar o vídeo.";
+        appAlert.error("Vídeo", message);
       }
     },
     [dispatch, router],
@@ -137,7 +142,7 @@ export default function CaptureScreen() {
 
   const startRecording = useCallback(async () => {
     if (!cameraRef.current || !ready) return;
-    setPhase('recording');
+    setPhase("recording");
     setElapsedMs(0);
     pulse.set(withTiming(1.08, { duration: 400 }));
 
@@ -152,42 +157,47 @@ export default function CaptureScreen() {
         maxDuration: Math.floor(MAX_VIDEO_DURATION_MS / 1000),
         maxFileSize: MAX_VIDEO_FILE_SIZE_BYTES,
         // H.264 quando disponível (iOS) — melhor interoperabilidade com Android/R2.
-        codec: 'avc1',
+        codec: "avc1",
       });
 
       clearTimers();
-      setPhase('idle');
+      setPhase("idle");
       pulse.set(withTiming(1, { duration: 200 }));
 
       if (!recorded?.uri) return;
 
-      const durationMs = Math.min(Date.now() - startedAt, MAX_VIDEO_DURATION_MS);
+      const durationMs = Math.min(
+        Date.now() - startedAt,
+        MAX_VIDEO_DURATION_MS,
+      );
       const validated = validateVideoMeta({
         uri: recorded.uri,
         durationMs,
-        mimeType: 'video/mp4',
+        mimeType: "video/mp4",
       });
-      void goToPreview({ ...validated, source: 'camera' });
+      void goToPreview({ ...validated, source: "camera" });
     } catch (error) {
       clearTimers();
-      setPhase('idle');
+      setPhase("idle");
       pulse.set(withTiming(1, { duration: 200 }));
       const message =
-        error instanceof Error ? error.message : 'Não foi possível gravar o vídeo.';
-      appAlert.error('Gravação', message);
+        error instanceof Error
+          ? error.message
+          : "Não foi possível gravar o vídeo.";
+      appAlert.error("Gravação", message);
     }
   }, [clearTimers, goToPreview, pulse, ready]);
 
   const cancelCountdown = useCallback(() => {
-    if (phase !== 'countdown') return;
+    if (phase !== "countdown") return;
     clearTimers();
-    setPhase('idle');
+    setPhase("idle");
     setCountdown(countdownSeconds);
     pulse.set(withTiming(1, { duration: 150 }));
   }, [clearTimers, countdownSeconds, phase, pulse]);
 
   const beginCountdown = useCallback(() => {
-    if (phase !== 'idle' || !ready) return;
+    if (phase !== "idle" || !ready) return;
     clearTimers();
 
     if (countdownSeconds <= 0) {
@@ -195,7 +205,7 @@ export default function CaptureScreen() {
       return;
     }
 
-    setPhase('countdown');
+    setPhase("countdown");
     setCountdown(countdownSeconds);
 
     let remaining = countdownSeconds;
@@ -211,42 +221,42 @@ export default function CaptureScreen() {
   }, [clearTimers, countdownSeconds, phase, ready, startRecording]);
 
   const stopRecording = useCallback(() => {
-    if (phase !== 'recording') return;
+    if (phase !== "recording") return;
     cameraRef.current?.stopRecording();
   }, [phase]);
 
   const handlePrimaryControl = useCallback(() => {
-    if (phase === 'recording') {
+    if (phase === "recording") {
       stopRecording();
       return;
     }
-    if (phase === 'countdown') {
+    if (phase === "countdown") {
       cancelCountdown();
       return;
     }
     beginCountdown();
   }, [beginCountdown, cancelCountdown, phase, stopRecording]);
 
-  let controlLabel = t('capture.record');
-  if (phase === 'recording') controlLabel = t('capture.stop');
-  else if (phase === 'countdown') controlLabel = t('capture.cancelCountdown');
+  let controlLabel = t("capture.record");
+  if (phase === "recording") controlLabel = t("capture.stop");
+  else if (phase === "countdown") controlLabel = t("capture.cancelCountdown");
 
   const handleGallery = useCallback(async () => {
     try {
       const video = await pickGalleryVideo();
       if (!video) return;
-      await goToPreview({ ...video, source: 'gallery' });
+      await goToPreview({ ...video, source: "gallery" });
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : 'Falha ao escolher o vídeo.';
-      if (message.includes('configurações')) {
-        appAlert.warn('Galeria', message, [
-          { text: 'Cancelar', style: 'cancel' },
-          { text: 'Abrir ajustes', onPress: () => void openSystemSettings() },
+        error instanceof Error ? error.message : "Falha ao escolher o vídeo.";
+      if (message.includes("configurações")) {
+        appAlert.warn("Galeria", message, [
+          { text: "Cancelar", style: "cancel" },
+          { text: "Abrir ajustes", onPress: () => void openSystemSettings() },
         ]);
         return;
       }
-      appAlert.error('Galeria', message);
+      appAlert.error("Galeria", message);
     }
   }, [goToPreview]);
 
@@ -256,9 +266,15 @@ export default function CaptureScreen() {
 
   if (permissionOk === false) {
     return (
-      <View style={[styles.root, styles.centered, { paddingTop: insets.top }]}>
-        <Text style={styles.permissionTitle}>Precisamos da câmera</Text>
-        <Text style={styles.permissionBody}>
+      <View
+        style={[
+          themedStyles.root,
+          themedStyles.centered,
+          { paddingTop: insets.top },
+        ]}
+      >
+        <Text style={themedStyles.permissionTitle}>Precisamos da câmera</Text>
+        <Text style={themedStyles.permissionBody}>
           Para medir sua aura, permita câmera e microfone. Você também pode
           enviar um vídeo da galeria (até 1 minuto / 50 MB).
         </Text>
@@ -267,24 +283,24 @@ export default function CaptureScreen() {
           onPress={() => {
             void ensureCapturePermissions().then((r) => setPermissionOk(r.ok));
           }}
-          style={{ alignSelf: 'stretch', marginHorizontal: 24 }}
+          style={{ alignSelf: "stretch", marginHorizontal: 24 }}
         />
         <GradientButton
           title="Enviar da galeria"
           variant="ghost"
           icon={<ImagePlus size={18} color={palette.textPrimary} />}
           onPress={() => void handleGallery()}
-          style={{ alignSelf: 'stretch', marginHorizontal: 24, marginTop: 12 }}
+          style={{ alignSelf: "stretch", marginHorizontal: 24, marginTop: 12 }}
         />
         <Pressable onPress={() => router.back()} style={{ marginTop: 20 }}>
-          <Text style={styles.link}>Voltar</Text>
+          <Text style={themedStyles.link}>Voltar</Text>
         </Pressable>
       </View>
     );
   }
 
   return (
-    <View style={styles.root}>
+    <View style={themedStyles.root}>
       {permissionOk ? (
         <CameraView
           ref={cameraRef}
@@ -292,7 +308,7 @@ export default function CaptureScreen() {
           facing={facing}
           mode="video"
           mute={false}
-          mirror={facing === 'front'}
+          mirror={facing === "front"}
           videoQuality="720p"
           onCameraReady={() => setReady(true)}
         />
@@ -305,8 +321,8 @@ export default function CaptureScreen() {
           accessibilityRole="button"
           accessibilityLabel="Fechar"
           onPress={() => {
-            if (phase === 'recording') stopRecording();
-            if (phase === 'countdown') cancelCountdown();
+            if (phase === "recording") stopRecording();
+            if (phase === "countdown") cancelCountdown();
             clearTimers();
             router.back();
           }}
@@ -317,28 +333,32 @@ export default function CaptureScreen() {
         <View style={styles.badge}>
           <Film size={14} color={palette.neon} strokeWidth={2} />
           <Text style={styles.badgeText}>
-            {phase === 'recording'
+            {phase === "recording"
               ? formatSeconds(elapsedMs)
-              : 'Até 1:00 · 50 MB'}
+              : "Até 1:00 · 50 MB"}
           </Text>
         </View>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Inverter câmera"
-          disabled={phase !== 'idle'}
+          disabled={phase !== "idle"}
           onPress={() =>
-            setFacing((current) => (current === 'front' ? 'back' : 'front'))
+            setFacing((current) => (current === "front" ? "back" : "front"))
           }
           style={styles.iconBtn}
         >
-          <FlipHorizontal2 size={20} color={palette.textPrimary} strokeWidth={1.8} />
+          <FlipHorizontal2
+            size={20}
+            color={palette.textPrimary}
+            strokeWidth={1.8}
+          />
         </Pressable>
       </View>
 
-      {phase === 'countdown' ? (
+      {phase === "countdown" ? (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={t('capture.cancelCountdown')}
+          accessibilityLabel={t("capture.cancelCountdown")}
           onPress={cancelCountdown}
           style={styles.countdownOverlay}
         >
@@ -348,9 +368,9 @@ export default function CaptureScreen() {
             style={styles.countdownContent}
           >
             <Text style={styles.countdownNumber}>{countdown}</Text>
-            <Text style={styles.countdownHint}>{t('capture.getReady')}</Text>
+            <Text style={styles.countdownHint}>{t("capture.getReady")}</Text>
             <Text style={styles.countdownCancelHint}>
-              {t('capture.tapToCancel')}
+              {t("capture.tapToCancel")}
             </Text>
           </Animated.View>
         </Pressable>
@@ -359,10 +379,10 @@ export default function CaptureScreen() {
       <View style={[styles.island, { bottom: insets.bottom + 20 }]}>
         <BlurView intensity={42} tint="dark" style={styles.islandBlur}>
           <View
-            pointerEvents={phase === 'idle' ? 'auto' : 'none'}
-            style={phase === 'idle' ? undefined : styles.settingsLocked}
+            pointerEvents={phase === "idle" ? "auto" : "none"}
+            style={phase === "idle" ? undefined : styles.settingsLocked}
           >
-            <CaptureSettingsIsland disabled={phase !== 'idle'} />
+            <CaptureSettingsIsland disabled={phase !== "idle"} />
           </View>
 
           <View style={styles.islandDivider} />
@@ -371,27 +391,31 @@ export default function CaptureScreen() {
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Enviar vídeo da galeria"
-              disabled={phase !== 'idle'}
+              disabled={phase !== "idle"}
               onPress={() => void handleGallery()}
               style={[
                 styles.sideAction,
-                phase !== 'idle' && styles.sideActionDisabled,
+                phase !== "idle" && styles.sideActionDisabled,
               ]}
             >
-              <ImagePlus size={22} color={palette.textPrimary} strokeWidth={1.8} />
-              <Text style={styles.sideLabel}>{t('capture.gallery')}</Text>
+              <ImagePlus
+                size={22}
+                color={palette.textPrimary}
+                strokeWidth={1.8}
+              />
+              <Text style={styles.sideLabel}>{t("capture.gallery")}</Text>
             </Pressable>
 
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={controlLabel}
-              disabled={!ready && phase === 'idle'}
+              disabled={!ready && phase === "idle"}
               onPress={handlePrimaryControl}
             >
               <Animated.View
                 style={[
                   styles.recordOuter,
-                  (phase === 'recording' || phase === 'countdown') &&
+                  (phase === "recording" || phase === "countdown") &&
                     styles.recordOuterActive,
                   recordButtonStyle,
                 ]}
@@ -399,7 +423,7 @@ export default function CaptureScreen() {
                 <View
                   style={[
                     styles.recordInner,
-                    (phase === 'recording' || phase === 'countdown') &&
+                    (phase === "recording" || phase === "countdown") &&
                       styles.recordInnerStop,
                   ]}
                 />
@@ -418,50 +442,75 @@ export default function CaptureScreen() {
   );
 }
 
+const createRootStyles = (palette: AppPalette) =>
+  StyleSheet.create({
+    root: {
+      flex: 1,
+      backgroundColor: palette.bg,
+    },
+    centered: {
+      justifyContent: "center",
+      alignItems: "center",
+      paddingHorizontal: 24,
+      gap: 16,
+    },
+    permissionTitle: {
+      color: palette.textPrimary,
+      fontFamily: fonts.bold,
+      fontSize: 24,
+      textAlign: "center",
+    },
+    permissionBody: {
+      color: palette.textSecondary,
+      fontFamily: fonts.regular,
+      fontSize: 15,
+      lineHeight: 22,
+      textAlign: "center",
+      marginBottom: 8,
+    },
+    link: {
+      color: palette.textSecondary,
+      fontFamily: fonts.medium,
+      fontSize: 15,
+    },
+  });
+
+// Camera viewfinder overlay chrome — intentionally dark-biased regardless
+// of app theme, for legibility over the live camera preview.
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: palette.bg,
-  },
-  centered: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 24,
-    gap: 16,
-  },
   cameraPlaceholder: {
-    backgroundColor: '#111118',
+    backgroundColor: "#111118",
   },
   topBar: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     zIndex: 2,
     paddingHorizontal: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   iconBtn: {
     width: 42,
     height: 42,
     borderRadius: 14,
-    borderCurve: 'continuous',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.45)',
+    borderCurve: "continuous",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(0,0,0,0.45)",
     borderWidth: 1,
     borderColor: palette.borderSubtle,
   },
   badge: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 999,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: "rgba(0,0,0,0.5)",
     borderWidth: 1,
     borderColor: palette.borderSubtle,
   },
@@ -469,20 +518,20 @@ const styles = StyleSheet.create({
     color: palette.textPrimary,
     fontFamily: fonts.medium,
     fontSize: 13,
-    fontVariant: ['tabular-nums'],
+    fontVariant: ["tabular-nums"],
   },
   countdownOverlay: {
     ...StyleSheet.absoluteFill,
     zIndex: 3,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(9,9,11,0.55)',
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(9,9,11,0.55)",
   },
   countdownContent: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   countdownNumber: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontFamily: fonts.bold,
     fontSize: 96,
     letterSpacing: 2,
@@ -492,7 +541,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.medium,
     fontSize: 16,
     letterSpacing: 2,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
     marginTop: 8,
   },
   countdownCancelHint: {
@@ -502,22 +551,22 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   island: {
-    position: 'absolute',
+    position: "absolute",
     left: 0,
     right: 0,
     zIndex: 4,
-    alignItems: 'center',
+    alignItems: "center",
     paddingHorizontal: 16,
   },
   islandBlur: {
-    width: '100%',
+    width: "100%",
     maxWidth: 420,
     borderRadius: 26,
-    overflow: 'hidden',
+    overflow: "hidden",
     borderWidth: 1,
     borderColor: palette.borderSubtle,
-    backgroundColor: 'rgba(22,22,31,0.55)',
-    shadowColor: '#6D5DFC',
+    backgroundColor: "rgba(22,22,31,0.55)",
+    shadowColor: "#6D5DFC",
     shadowOpacity: 0.28,
     shadowRadius: 18,
     shadowOffset: { width: 0, height: 8 },
@@ -534,13 +583,13 @@ const styles = StyleSheet.create({
   controls: {
     paddingHorizontal: 24,
     paddingVertical: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   sideAction: {
     width: 72,
-    alignItems: 'center',
+    alignItems: "center",
     gap: 6,
   },
   sideActionDisabled: {
@@ -556,9 +605,9 @@ const styles = StyleSheet.create({
     height: 78,
     borderRadius: 39,
     borderWidth: 4,
-    borderColor: '#FFFFFF',
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
   },
   recordOuterActive: {
     borderColor: palette.error,
@@ -573,24 +622,5 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 6,
-  },
-  permissionTitle: {
-    color: palette.textPrimary,
-    fontFamily: fonts.bold,
-    fontSize: 24,
-    textAlign: 'center',
-  },
-  permissionBody: {
-    color: palette.textSecondary,
-    fontFamily: fonts.regular,
-    fontSize: 15,
-    lineHeight: 22,
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  link: {
-    color: palette.textSecondary,
-    fontFamily: fonts.medium,
-    fontSize: 15,
   },
 });

@@ -30,7 +30,7 @@ import {
 import { setHasCompletedOnboarding } from '@/src/features/prefs/prefsSlice';
 import { AuraOrb } from '@/src/shared/ui/AuraOrb';
 import { GradientButton } from '@/src/shared/ui/GradientButton';
-import { fonts, palette } from '@/src/shared/ui/theme';
+import { fonts, usePalette, useThemedStyles, type AppPalette } from '@/src/shared/ui/theme';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const STORY_DURATION_MS = 5000;
@@ -44,6 +44,7 @@ function ProgressSegment({
   activeIndex: number;
   progress: SharedValue<number>;
 }) {
+  const styles = useThemedStyles(createStyles);
   const style = useAnimatedStyle(() => {
     let fill = 0;
     if (index < activeIndex) fill = 1;
@@ -62,6 +63,7 @@ function ProgressSegment({
 }
 
 function TierScale() {
+  const styles = useThemedStyles(createStyles);
   return (
     <View style={styles.tierRow}>
       {AURA_TIERS.map((tier) => (
@@ -83,6 +85,7 @@ function TierScale() {
 }
 
 function StorySlide({ item }: { item: OnboardingSlide }) {
+  const styles = useThemedStyles(createStyles);
   return (
     <View style={styles.slide}>
       <View style={styles.slideOrb}>
@@ -110,6 +113,8 @@ export default function OnboardingScreen() {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const palette = usePalette();
+  const styles = useThemedStyles(createStyles);
   const listRef = useRef<FlatList<OnboardingSlide>>(null);
   const [index, setIndex] = useState(0);
   const progress = useSharedValue(0);
@@ -254,7 +259,8 @@ export default function OnboardingScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (palette: AppPalette) =>
+  StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: palette.bg,

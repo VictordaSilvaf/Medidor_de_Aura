@@ -1,8 +1,8 @@
-import { Image } from 'expo-image';
-import { useRouter } from 'expo-router';
-import { ImagePlus, RotateCcw, Upload, X } from 'lucide-react-native';
-import { useCallback, useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Image } from "expo-image";
+import { useRouter } from "expo-router";
+import { ImagePlus, RotateCcw, Upload, X } from "lucide-react-native";
+import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Pressable,
@@ -11,31 +11,36 @@ import {
   Text,
   TextInput,
   View,
-} from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useVideoPlayer, VideoView, type VideoThumbnail } from 'expo-video';
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useVideoPlayer, VideoView, type VideoThumbnail } from "expo-video";
 
-import { useAppDispatch, useAppSelector } from '@/src/core/hooks';
-import { selectAuthUser } from '@/src/features/auth/authSlice';
-import { selectDefaultVisibility } from '@/src/features/prefs/prefsSlice';
-import { presentProPaywallIfNeeded } from '@/src/features/monetization/monetizationBootstrap';
-import { isQuotaExceededError } from '@/src/features/monetization/quotaErrors';
-import type { VideoVisibility } from '@/src/features/social/types';
-import { submitPendingCapture } from '@/src/features/video-analysis/analysisApi';
+import { useAppDispatch, useAppSelector } from "@/src/core/hooks";
+import { selectAuthUser } from "@/src/features/auth/authSlice";
+import { selectDefaultVisibility } from "@/src/features/prefs/prefsSlice";
+import { presentProPaywallIfNeeded } from "@/src/features/monetization/monetizationBootstrap";
+import { isQuotaExceededError } from "@/src/features/monetization/quotaErrors";
+import type { VideoVisibility } from "@/src/features/social/types";
+import { submitPendingCapture } from "@/src/features/video-analysis/analysisApi";
 import {
   clearActiveChallengeId,
   clearPendingCapture,
   selectActiveChallengeId,
   selectPendingCapture,
-} from '@/src/features/video-analysis/pendingCaptureSlice';
+} from "@/src/features/video-analysis/pendingCaptureSlice";
 import {
   generateFrameCandidates,
   pickGalleryThumbnail,
   type FrameCandidate,
-} from '@/src/features/video-analysis/thumbnailApi';
-import { appAlert } from '@/src/shared/ui/appAlert';
-import { GradientButton } from '@/src/shared/ui/GradientButton';
-import { fonts, palette } from '@/src/shared/ui/theme';
+} from "@/src/features/video-analysis/thumbnailApi";
+import { appAlert } from "@/src/shared/ui/appAlert";
+import { GradientButton } from "@/src/shared/ui/GradientButton";
+import {
+  fonts,
+  palette,
+  useThemedStyles,
+  type AppPalette,
+} from "@/src/shared/ui/theme";
 
 export default function PreviewScreen() {
   const { t } = useTranslation();
@@ -47,14 +52,19 @@ export default function PreviewScreen() {
   const defaultVisibility = useAppSelector(selectDefaultVisibility);
   const activeChallengeId = useAppSelector(selectActiveChallengeId);
 
-  const [visibility, setVisibility] = useState<VideoVisibility>(defaultVisibility);
-  const [title, setTitle] = useState('');
+  const [visibility, setVisibility] =
+    useState<VideoVisibility>(defaultVisibility);
+  const [title, setTitle] = useState("");
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [frames, setFrames] = useState<FrameCandidate[]>([]);
   const [framesLoading, setFramesLoading] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [galleryUri, setGalleryUri] = useState<string | null>(null);
+  // Overlay chrome renders on top of the captured video preview, so it
+  // intentionally keeps the dark-biased brand palette (like capture.tsx)
+  // for legibility. Only the empty/no-capture state follows the theme.
+  const themedStyles = useThemedStyles(createRootStyles);
 
   const player = useVideoPlayer(capture?.uri ?? null, (instance) => {
     instance.loop = true;
@@ -79,15 +89,15 @@ export default function PreviewScreen() {
         setSelectedId(candidates[0]?.id ?? null);
         setGalleryUri(null);
       } catch (error) {
-        console.warn('[preview] frame generation failed', error);
+        console.warn("[preview] frame generation failed", error);
         if (!cancelled) {
           setFrames([]);
-          const code = error instanceof Error ? error.message : '';
+          const code = error instanceof Error ? error.message : "";
           appAlert.warn(
-            t('preview.cover'),
-            code === 'VIDEO_FILE_MISSING'
-              ? t('preview.framesMissing')
-              : t('preview.framesFailed'),
+            t("preview.cover"),
+            code === "VIDEO_FILE_MISSING"
+              ? t("preview.framesMissing")
+              : t("preview.framesFailed"),
           );
         }
       } finally {
@@ -102,7 +112,7 @@ export default function PreviewScreen() {
 
   const handleDiscard = useCallback(() => {
     dispatch(clearPendingCapture());
-    router.replace('/(app)/capture');
+    router.replace("/(app)/capture");
   }, [dispatch, router]);
 
   const handlePickGallery = useCallback(async () => {
@@ -110,17 +120,17 @@ export default function PreviewScreen() {
       const picked = await pickGalleryThumbnail();
       if (!picked) return;
       setGalleryUri(picked.uri);
-      setSelectedId('gallery');
+      setSelectedId("gallery");
     } catch (error) {
       appAlert.error(
-        t('common.error'),
-        error instanceof Error ? error.message : t('common.error'),
+        t("common.error"),
+        error instanceof Error ? error.message : t("common.error"),
       );
     }
   }, [t]);
 
   const selectedSource: string | VideoThumbnail | null = (() => {
-    if (selectedId === 'gallery' && galleryUri) return galleryUri;
+    if (selectedId === "gallery" && galleryUri) return galleryUri;
     const frame = frames.find((f) => f.id === selectedId);
     return frame?.preview ?? galleryUri ?? null;
   })();
@@ -146,19 +156,19 @@ export default function PreviewScreen() {
       if (isQuotaExceededError(error)) {
         setUploading(false);
         appAlert.warn(
-          t('quota.title'),
-          t('quota.body', {
+          t("quota.title"),
+          t("quota.body", {
             daily: error.dailyUsed,
             monthly: error.monthlyUsed,
           }),
           [
-            { text: t('common.cancel'), style: 'cancel' },
+            { text: t("common.cancel"), style: "cancel" },
             {
-              text: t('premium.upgrade'),
+              text: t("premium.upgrade"),
               onPress: () => {
                 void (async () => {
                   if (!user?.id) {
-                    router.push('/premium');
+                    router.push("/(app)/premium");
                     return;
                   }
                   try {
@@ -167,10 +177,10 @@ export default function PreviewScreen() {
                       user.id,
                     );
                     if (!purchased) {
-                      router.push('/premium');
+                      router.push("/(app)/premium");
                     }
                   } catch {
-                    router.push('/premium');
+                    router.push("/(app)/premium");
                   }
                 })();
               },
@@ -180,8 +190,8 @@ export default function PreviewScreen() {
         return;
       }
       const message =
-        error instanceof Error ? error.message : t('common.error');
-      appAlert.error(t('common.error'), message);
+        error instanceof Error ? error.message : t("common.error");
+      appAlert.error(t("common.error"), message);
       setUploading(false);
     }
   }, [
@@ -199,18 +209,18 @@ export default function PreviewScreen() {
 
   if (!capture) {
     return (
-      <View style={[styles.root, styles.centered]}>
-        <Text style={styles.empty}>{t('preview.empty')}</Text>
+      <View style={[themedStyles.root, themedStyles.centered]}>
+        <Text style={themedStyles.empty}>{t("preview.empty")}</Text>
         <GradientButton
-          title={t('preview.backToCapture')}
-          onPress={() => router.replace('/(app)/capture')}
+          title={t("preview.backToCapture")}
+          onPress={() => router.replace("/(app)/capture")}
         />
       </View>
     );
   }
 
   return (
-    <View style={styles.root}>
+    <View style={themedStyles.root}>
       <VideoView
         player={player}
         style={StyleSheet.absoluteFill}
@@ -221,7 +231,7 @@ export default function PreviewScreen() {
       <View style={[styles.topBar, { paddingTop: insets.top + 8 }]}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={t('common.back')}
+          accessibilityLabel={t("common.back")}
           disabled={uploading}
           onPress={() => {
             dispatch(clearPendingCapture());
@@ -231,7 +241,7 @@ export default function PreviewScreen() {
         >
           <X size={20} color={palette.textPrimary} strokeWidth={1.8} />
         </Pressable>
-        <Text style={styles.title}>{t('preview.title')}</Text>
+        <Text style={styles.title}>{t("preview.title")}</Text>
         <View style={styles.iconBtnPlaceholder} />
       </View>
 
@@ -244,30 +254,33 @@ export default function PreviewScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <Text style={styles.hint}>
-          {t('preview.meta', {
+          {t("preview.meta", {
             source:
-              capture.source === 'camera'
-                ? t('preview.sourceCamera')
-                : t('preview.sourceGallery'),
+              capture.source === "camera"
+                ? t("preview.sourceCamera")
+                : t("preview.sourceGallery"),
             seconds: Math.round(capture.durationMs / 1000),
             mb: (capture.fileSizeBytes / (1024 * 1024)).toFixed(1),
           })}
         </Text>
 
-        <Text style={styles.visibilityLabel}>{t('preview.titleLabel')}</Text>
+        <Text style={styles.visibilityLabel}>{t("preview.titleLabel")}</Text>
         <TextInput
           value={title}
           onChangeText={setTitle}
-          placeholder={t('preview.titlePlaceholder')}
+          placeholder={t("preview.titlePlaceholder")}
           placeholderTextColor={palette.textDisabled}
           maxLength={80}
           editable={!uploading}
           style={styles.titleInput}
         />
 
-        <Text style={styles.visibilityLabel}>{t('preview.cover')}</Text>
+        <Text style={styles.visibilityLabel}>{t("preview.cover")}</Text>
         {framesLoading ? (
-          <ActivityIndicator color={palette.primary} style={{ marginVertical: 8 }} />
+          <ActivityIndicator
+            color={palette.primary}
+            style={{ marginVertical: 8 }}
+          />
         ) : (
           <ScrollView
             horizontal
@@ -297,10 +310,10 @@ export default function PreviewScreen() {
             {galleryUri ? (
               <Pressable
                 disabled={uploading}
-                onPress={() => setSelectedId('gallery')}
+                onPress={() => setSelectedId("gallery")}
                 style={[
                   styles.frameCard,
-                  selectedId === 'gallery' && styles.frameCardActive,
+                  selectedId === "gallery" && styles.frameCardActive,
                 ]}
               >
                 <Image
@@ -316,14 +329,16 @@ export default function PreviewScreen() {
               style={styles.galleryPick}
             >
               <ImagePlus size={20} color={palette.textSecondary} />
-              <Text style={styles.galleryPickText}>{t('preview.pickCover')}</Text>
+              <Text style={styles.galleryPickText}>
+                {t("preview.pickCover")}
+              </Text>
             </Pressable>
           </ScrollView>
         )}
 
-        <Text style={styles.visibilityLabel}>{t('preview.visibility')}</Text>
+        <Text style={styles.visibilityLabel}>{t("preview.visibility")}</Text>
         <View style={styles.visibilityRow}>
-          {(['public', 'private'] as const).map((value) => {
+          {(["public", "private"] as const).map((value) => {
             const active = visibility === value;
             return (
               <Pressable
@@ -332,13 +347,17 @@ export default function PreviewScreen() {
                 onPress={() => setVisibility(value)}
                 style={[styles.visCard, active && styles.visCardActive]}
               >
-                <Text style={[styles.visTitle, active && styles.visTitleActive]}>
-                  {value === 'public' ? t('preview.public') : t('preview.private')}
+                <Text
+                  style={[styles.visTitle, active && styles.visTitleActive]}
+                >
+                  {value === "public"
+                    ? t("preview.public")
+                    : t("preview.private")}
                 </Text>
                 <Text style={styles.visHint}>
-                  {value === 'public'
-                    ? t('preview.publicHint')
-                    : t('preview.privateHint')}
+                  {value === "public"
+                    ? t("preview.publicHint")
+                    : t("preview.privateHint")}
                 </Text>
               </Pressable>
             );
@@ -348,7 +367,7 @@ export default function PreviewScreen() {
         {uploading ? (
           <View style={styles.progressBlock}>
             <Text style={styles.progressLabel}>
-              {t('preview.uploading', { percent: Math.round(progress * 100) })}
+              {t("preview.uploading", { percent: Math.round(progress * 100) })}
             </Text>
             <View style={styles.progressTrack}>
               <View
@@ -362,14 +381,14 @@ export default function PreviewScreen() {
         ) : (
           <View style={styles.actions}>
             <GradientButton
-              title={t('preview.discard')}
+              title={t("preview.discard")}
               variant="ghost"
               icon={<RotateCcw size={18} color={palette.textPrimary} />}
               onPress={handleDiscard}
               style={styles.action}
             />
             <GradientButton
-              title={t('preview.useThis')}
+              title={t("preview.useThis")}
               icon={<Upload size={18} color="#FFFFFF" />}
               onPress={() => void handleSubmit()}
               style={styles.action}
@@ -381,40 +400,46 @@ export default function PreviewScreen() {
   );
 }
 
+const createRootStyles = (palette: AppPalette) =>
+  StyleSheet.create({
+    root: {
+      flex: 1,
+      backgroundColor: palette.bg,
+    },
+    centered: {
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 20,
+      padding: 24,
+    },
+    empty: {
+      color: palette.textSecondary,
+      fontFamily: fonts.medium,
+      fontSize: 16,
+    },
+  });
+
+// Video overlay chrome — intentionally dark-biased (renders on top of the
+// video preview regardless of app theme), mirrors capture.tsx.
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    backgroundColor: palette.bg,
-  },
-  centered: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 20,
-    padding: 24,
-  },
-  empty: {
-    color: palette.textSecondary,
-    fontFamily: fonts.medium,
-    fontSize: 16,
-  },
   topBar: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     zIndex: 2,
     paddingHorizontal: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   iconBtn: {
     width: 42,
     height: 42,
     borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.45)',
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(0,0,0,0.45)",
     borderWidth: 1,
     borderColor: palette.borderSubtle,
   },
@@ -429,36 +454,36 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
   panelScroll: {
-    position: 'absolute',
+    position: "absolute",
     left: 0,
     right: 0,
     bottom: 0,
-    maxHeight: '58%',
+    maxHeight: "58%",
   },
   panel: {
     paddingHorizontal: 20,
     gap: 12,
-    backgroundColor: 'rgba(9,9,11,0.9)',
+    backgroundColor: "rgba(9,9,11,0.9)",
     paddingTop: 16,
   },
   hint: {
     color: palette.textSecondary,
     fontFamily: fonts.medium,
     fontSize: 13,
-    textAlign: 'center',
+    textAlign: "center",
   },
   visibilityLabel: {
     color: palette.textSecondary,
     fontFamily: fonts.medium,
     fontSize: 12,
     letterSpacing: 1,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
   },
   titleInput: {
     borderRadius: 12,
     borderWidth: 1,
     borderColor: palette.borderSubtle,
-    backgroundColor: 'rgba(255,255,255,0.04)',
+    backgroundColor: "rgba(255,255,255,0.04)",
     color: palette.textPrimary,
     fontFamily: fonts.medium,
     fontSize: 15,
@@ -473,16 +498,16 @@ const styles = StyleSheet.create({
     width: 72,
     height: 96,
     borderRadius: 12,
-    overflow: 'hidden',
+    overflow: "hidden",
     borderWidth: 2,
-    borderColor: 'transparent',
+    borderColor: "transparent",
   },
   frameCardActive: {
     borderColor: palette.primary,
   },
   frameImage: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   galleryPick: {
     width: 72,
@@ -490,9 +515,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     borderColor: palette.borderSubtle,
-    borderStyle: 'dashed',
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderStyle: "dashed",
+    alignItems: "center",
+    justifyContent: "center",
     gap: 6,
     paddingHorizontal: 6,
   },
@@ -500,10 +525,10 @@ const styles = StyleSheet.create({
     color: palette.textSecondary,
     fontFamily: fonts.medium,
     fontSize: 10,
-    textAlign: 'center',
+    textAlign: "center",
   },
   visibilityRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 10,
   },
   visCard: {
@@ -513,7 +538,7 @@ const styles = StyleSheet.create({
     borderColor: palette.borderSubtle,
     padding: 12,
     gap: 4,
-    backgroundColor: 'rgba(255,255,255,0.03)',
+    backgroundColor: "rgba(255,255,255,0.03)",
   },
   visCardActive: {
     borderColor: palette.primary,
@@ -534,7 +559,7 @@ const styles = StyleSheet.create({
     lineHeight: 15,
   },
   actions: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 12,
   },
   action: {
@@ -548,16 +573,16 @@ const styles = StyleSheet.create({
     color: palette.textPrimary,
     fontFamily: fonts.medium,
     fontSize: 14,
-    textAlign: 'center',
+    textAlign: "center",
   },
   progressTrack: {
     height: 4,
     borderRadius: 2,
-    overflow: 'hidden',
-    backgroundColor: 'rgba(255,255,255,0.12)',
+    overflow: "hidden",
+    backgroundColor: "rgba(255,255,255,0.12)",
   },
   progressFill: {
-    height: '100%',
+    height: "100%",
     backgroundColor: palette.primary,
   },
 });
